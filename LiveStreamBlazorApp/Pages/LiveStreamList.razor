@@ -2,6 +2,26 @@
 @inherits LiveStreamListBase
 
 <h3>Live Streams</h3>
+<button class="btn btn-primary" @onclick="@ConnectToServer" disabled="@isConnected">Connect</button>
+<table>
+    <tr>
+        <th>Connection Status:</th>
+        <td>@connectionStatus</td>
+
+        <th>Messages:</th>
+
+        @foreach (var msg in notifications)
+        {
+            <td>@msg</td>
+        }
+    </tr>
+</table>
+
+<h4></h4>
+
+<div>
+
+</div>
 
 @if (LiveStreams == null)
 {

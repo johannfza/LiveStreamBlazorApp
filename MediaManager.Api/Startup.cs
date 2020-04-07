@@ -27,6 +27,17 @@ namespace MediaManager.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //for SignalR
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
+            services.AddSignalR();
+            services.AddControllers();
+
             services.AddControllers();
 
             services.AddDbContext<MediaManagementApiContext>(options =>
@@ -47,11 +58,12 @@ namespace MediaManager.Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseCors("CorsPolicy");
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<NotificationHub>("/notificationhub");
                 endpoints.MapControllers();
             });
         }
