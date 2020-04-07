@@ -98,10 +98,29 @@ namespace MediaManager.Api.Controllers
         // POST: api/LiveStreams
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
+
+        //On a Successful Post return:
+        //Return Http Status Code 201 
+        //Return the newly created resource 
+        //Include location header in the response (Uri of newly created recsource) 
         [HttpPost]
         public async Task<ActionResult<LiveStream>> CreateLiveStream(LiveStream liveStream)
         {
-            return Ok(await liveStreamRepository.AddLiveStream(liveStream));
+            try
+            {
+                if (liveStream == null)
+                {
+                    return BadRequest();
+                }
+                var createdLiveStream = await liveStreamRepository.AddLiveStream(liveStream);
+                return CreatedAtAction(nameof(GetLiveStream), new { id = createdLiveStream.Id}, createdLiveStream );
+            }
+            catch (Exception)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retriving data from database");
+
+            }
         }
 
         // DELETE: api/LiveStreams/5

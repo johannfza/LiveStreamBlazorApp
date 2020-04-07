@@ -1,0 +1,41 @@
+﻿
+<h4>Publish new stream</h4>
+
+<EditForm Model="@NewStream" OnValidSubmit="@SaveNewStream">
+    <div class="form-group">
+        <label>Title</label>
+        <InputText class="form-control" @bind-Value="NewStream.Title" placeholder="Live: Company TownHall 2020" />
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <InputTextArea class="form-control" @bind-Value="NewStream.Description" placeholder="Regarding the new implentation of policy 1880 the HR department will address the following issues: " />
+    </div>
+    <div class="form-group">
+        <label>Url</label>
+        <InputText class="form-control" @bind-Value="NewStream.Url" placeholder="http://www.mystreamurl/live/townhall2020.m3u8" />
+        <small class="form-text text-muted"></small>
+    </div>
+    <button type="submit" class="btn btn-primary">Publish</button>
+</EditForm>
+
+@code {
+
+    [Inject]
+    protected HttpClient http { get; set; }
+
+    public LiveStream NewStream { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        NewStream = new LiveStream();
+
+        return base.OnInitializedAsync();
+    }
+
+    protected async Task<LiveStream> SaveNewStream()
+    {
+        var savedStream = await http.PostJsonAsync<LiveStream>("http://localhost:50395/api/livestreams", NewStream);
+        Debug.WriteLine(savedStream.ToString());
+        return savedStream;
+    }
+}

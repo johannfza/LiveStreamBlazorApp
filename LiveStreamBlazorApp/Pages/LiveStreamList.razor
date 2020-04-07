@@ -3,7 +3,7 @@
 
 <h3>Live Streams</h3>
 
-@if (LiveStreamList == null)
+@if (LiveStreams == null)
 {
     <div class="spinner"></div>
 }
@@ -16,7 +16,7 @@ else
             <th>Description</th>
             <th>Source</th>
         </tr>
-        @foreach (var livestream in LiveStreamList)
+        @foreach (var livestream in LiveStreams)
         {
             <tr>
                 <td>@livestream.Id</td>
@@ -27,4 +27,16 @@ else
         }
     </table>
 
+}
+
+@if (AddStreamApprear == true)
+{
+    <button class="btn btn-danger" @onclick="@AddNewStream">Cancel</button>
+
+    <AddStream></AddStream>
+
+}
+else
+{
+    <button class="btn btn-primary" @onclick="@AddNewStream">Add New Stream</button>
 }

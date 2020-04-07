@@ -1,29 +1,42 @@
 ﻿using MediaModelLibrary;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace LiveStreamBlazorApp.Pages
 {
     public class LiveStreamListBase : ComponentBase
     {
-        public List<LiveStream> LiveStreamList { get; set; }
+
+        [Inject]
+        protected HttpClient http { get; set; }
+
+        public bool AddStreamApprear { get; set; } = false;
+
+        public List<LiveStream> LiveStreams { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
-            await Task.Run(LoadList); 
+
+            try
+            {
+                LiveStreams = await http.GetJsonAsync<List<LiveStream>>("http://localhost:50395/api/livestreams");
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
-        private void LoadList()
+        protected void AddNewStream()
         {
-            System.Threading.Thread.Sleep(3000);
-            LiveStreamList = new List<LiveStream>();
-
-
+            AddStreamApprear = !AddStreamApprear;
         }
-
-
     }
 }
