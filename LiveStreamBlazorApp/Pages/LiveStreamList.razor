@@ -1,0 +1,30 @@
+﻿@page "/"
+@inherits LiveStreamListBase
+
+<h3>Live Streams</h3>
+
+@if (LiveStreamList == null)
+{
+    <div class="spinner"></div>
+}
+else
+{
+    <table class="table table-striped">
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Source</th>
+        </tr>
+        @foreach (var livestream in LiveStreamList)
+        {
+            <tr>
+                <td>@livestream.Id</td>
+                <td>@livestream.Title</td>
+                <td>@livestream.Description</td>
+                <td>@livestream.Url</td>
+            </tr>
+        }
+    </table>
+
+}
