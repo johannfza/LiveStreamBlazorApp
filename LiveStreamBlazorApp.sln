@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveStreamBlazorApp", "Live
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaModelLibrary", "..\MediaModelLibrary\MediaModelLibrary\MediaModelLibrary.csproj", "{BD124F7F-0BDD-4956-B1C0-A0CB0A4302BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaManager.Api", "MediaManager.Api\MediaManager.Api.csproj", "{EC00FE2B-8155-42E7-AA73-D62DCB859D48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaManager.Api", "MediaManager.Api\MediaManager.Api.csproj", "{EC00FE2B-8155-42E7-AA73-D62DCB859D48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

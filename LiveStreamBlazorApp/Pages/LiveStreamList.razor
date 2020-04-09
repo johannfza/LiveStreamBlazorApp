@@ -3,6 +3,41 @@
 
 <h3>Live Streams</h3>
 
+<table class="table table-striped">
+    <tr>
+        <th>
+            Notification Connetion Status:
+        </th>
+        <td>
+            <font color="@NotificationServerConnectionStatusColor">@NotificationServerConnectionStatus</font>
+        </td>
+    </tr>
+    <tr>
+        <th>
+            Notification:
+        </th>
+        <td>
+            @NotificationMsg
+        </td>
+    </tr>
+    <tr>
+        <th>
+            Media Database Connetion Status:
+        </th>
+        <td>
+            <font color="@NotificationServerConnectionStatusColor">@NotificationServerConnectionStatus</font>
+        </td>
+        <th>
+            Database Notification:
+        </th>
+        <td>
+            @MediaDbNotificationMsg
+        </td>
+    </tr>
+
+</table>
+
+
 @if (LiveStreams == null)
 {
     <div class="spinner"></div>
@@ -28,15 +63,11 @@ else
     </table>
 
 }
+<button class="btn btn-primary" @onclick="@AddNewStream">Add New Stream</button>
 
-@if (AddStreamApprear == true)
+@if (modalType == ModalType.Create)
 {
-    <button class="btn btn-danger" @onclick="@AddNewStream">Cancel</button>
 
-    <AddStream></AddStream>
+    <LiveStreamModalCreateEdit OnCloseModal="@OnCloseModalCallback" ModalTitle="Add Live Stream"></LiveStreamModalCreateEdit>
 
-}
-else
-{
-    <button class="btn btn-primary" @onclick="@AddNewStream">Add New Stream</button>
 }

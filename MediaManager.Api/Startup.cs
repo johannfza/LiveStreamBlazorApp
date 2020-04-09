@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using MediaManager.Api.Data;
+using MediaManager.Api.SignalR;
 
 namespace MediaManager.Api
 {
@@ -34,6 +35,18 @@ namespace MediaManager.Api
 
             services.AddScoped<ILiveStreamRepository, LiveStreamRepository>();
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+
+                });
+
+            });
+
+            services.AddSignalR();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,8 +65,12 @@ namespace MediaManager.Api
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<MediaDbHub>("/mediadbhub");
+                endpoints.MapHub<NotificationHub>("/notificationhub");
                 endpoints.MapControllers();
             });
+
+            app.UseCors("CorsPolicy");
         }
     }
 }

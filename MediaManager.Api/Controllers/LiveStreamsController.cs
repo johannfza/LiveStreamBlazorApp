@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using MediaManager.Api.Data;
 using MediaModelLibrary;
 using System.Diagnostics;
+using MediaManager.Api.SignalR;
+using Microsoft.AspNetCore.SignalR;
 
 namespace MediaManager.Api.Controllers
 {
@@ -16,10 +18,12 @@ namespace MediaManager.Api.Controllers
     public class LiveStreamsController : ControllerBase
     {
         private readonly ILiveStreamRepository liveStreamRepository;
+        private readonly IHubContext<MediaDbHub> hubContext;
 
-        public LiveStreamsController(ILiveStreamRepository liveStreamRepository)
+        public LiveStreamsController(ILiveStreamRepository liveStreamRepository, IHubContext<MediaDbHub> hubcontext)
         {
             this.liveStreamRepository = liveStreamRepository;
+            this.hubContext = hubcontext;
         }
 
 
@@ -113,6 +117,9 @@ namespace MediaManager.Api.Controllers
                     return BadRequest();
                 }
                 var createdLiveStream = await liveStreamRepository.AddLiveStream(liveStream);
+                hubContext.Clients.All.SendAsync("dbupdate", "A new live stream has been added!");
+
+
                 return CreatedAtAction(nameof(GetLiveStream), new { id = createdLiveStream.Id}, createdLiveStream );
             }
             catch (Exception)
