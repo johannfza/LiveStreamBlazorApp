@@ -1,5 +1,7 @@
-﻿<div class="modal" tabindex="-1" style="display:block" role="dialog">
-    <div class="modal-dialog">
+﻿@inherits LiveStreamModalCreateEditBase
+
+<div class="modal" tabindex="-1" style="display:block" role="dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">@ModalTitle</h3>
@@ -7,81 +9,76 @@
                     <span aria-hidden="true">X</span>
                 </button>
             </div>
-            <EditForm Model="@liveStream" OnValidSubmit="@SubmitLiveStream">
-                <div class="modal-body">
+            <div class="modal-body">
+                @*<-- --> Video PLayer </-->*@
+                <video id="previewPlayer"
+                       class="video-js"
+                       controls
+                       autoplay="autoplay"
+                       preload="auto"
+                       width="720"
+                       height="405"
+                       poster=""
+                       fluid=""
+                       data-setup="{}"
+                       >
+
+                    <source src="media/BrownEyedLover.mp4" type="video/mp4" />
+                    @*<source src="MY_VIDEO.webm" type="video/webm" />*@
+                    <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a
+                        web browser that
+                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                    </p>
+                </video>
+                <EditForm Model="@liveStream" OnValidSubmit="@SubmitLiveStream">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
                     <div class="form-group">
                         <label>Title</label>
-                        <InputText class="form-control" @bind-Value="liveStream.Title" placeholder="Live: Company TownHall 2020" />
+                        <InputText class="form-control" @bind-Value="liveStream.Title" placeholder="Title of stream" />
                         <ValidationMessage For="@(()=>liveStream.Title)" />
                     </div>
                     <div class="form-group">
                         <label>Description</label>
-                        <InputTextArea class="form-control" @bind-Value="liveStream.Description" placeholder="Regarding the new implentation of policy 1880 the HR department will address the following issues: " />
+                        <InputTextArea class="form-control" @bind-Value="liveStream.Description" placeholder="Description" />
                         <ValidationMessage For="@(() => liveStream.Description)" />
                     </div>
                     <div class="form-group">
-                        <label>Url</label>
-                        <InputText class="form-control" @bind-Value="liveStream.Url" placeholder="http://www.mystreamurl/live/townhall2020.m3u8" />
-                        <ValidationMessage For="@(() => liveStream.Url)" />
+                        <label>RTMP Url</label>
+                        <div class="input-group mb-3">
+                            <input class="form-control" id="StreamUrl" value="@StreamUrl" />
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, "StreamUrl"))">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Stream Key</label>
+                        <small class="form-text text-muted">Stream key is dynamic.</small>
+                        <div class="input-group">
+                            <input class="form-control" id="StreamKey" value="@StreamKey" />
+                            <div class="form-group input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, "StreamKey"))">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Live Stream Url</label>
+                        <small class="form-text text-muted">After it's published</small>
+                        <div class="input-group">
+                            <InputText class="form-control" id="@liveStream.Url" @bind-Value="liveStream.Url" readonly />
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, liveStream.Url))">Copy</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-block btn-info" type="submit">Save</button>
                     </div>
-                </div>
-            </EditForm>
+                </EditForm>
+            </div>
         </div>
     </div>
 </div>
-
-
-
-
-@code{
-
-    [Inject]
-    protected HttpClient http { get; set; }
-
-    protected LiveStream liveStream = new LiveStream();
-
-    [Parameter]
-    public string ModalTitle { get; set; }
-
-    [Parameter]
-    public EventCallback<string> OnCloseModal { get; set; }
-
-    protected override Task OnInitializedAsync()
-    {
-
-        return base.OnInitializedAsync();
-    }
-
-    protected async Task SubmitLiveStream()
-    {
-        var response = await http.PostJsonAsync<LiveStream>("https://localhost:44354/api/livestreams", liveStream);
-        Debug.WriteLine(response.ToString());
-        OnSubmit();
-    }
-
-
-    protected void CloseModal()
-    {
-        if(OnCloseModal.HasDelegate == true)
-        {
-            OnCloseModal.InvokeAsync("Add Live Stream Cancelled");
-        }
-    }
-
-    protected void OnSubmit()
-    {
-        if (OnCloseModal.HasDelegate == true)
-        {
-            OnCloseModal.InvokeAsync("Submitted");
-        }
-    }
-
-
-
-}
 

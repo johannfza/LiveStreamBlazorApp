@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -13,19 +14,22 @@ namespace LiveStreamBlazorApp.Pages
 {
     public class LiveStreamListBase : ComponentBase
     {
+        //Diagnostics 
+        public string Timetaken = string.Empty;
+
         //UI
-        public string CallbackMsg = "";
+        public string CallbackMsg = string.Empty;
         public string NotificationServerConnectionStatus = "Not Connected";
         public string NotificationServerConnectionStatusColor = "black";
-        public string NotificationMsg = "";
+        public string NotificationMsg = string.Empty;
         public string MediaDbServerConnectionStatus = "Not Connected";
         public string MediaDbServerConnectionStatusColor = "black";
-        public string MediaDbNotificationMsg = "";
+        public string MediaDbNotificationMsg = string.Empty;
 
         //ApiEnpoints
         private string DbLiveStreamsUrl = "https://localhost:44354/api/livestreams";
 
-        //ServerHubURl
+        //ServerHubUrl
         private string notificationServerUrl = "https://localhost:44354/notificationhub" ;
         private string MedaiDbServerUrl = "https://localhost:44354/mediadbhub";
 
@@ -41,19 +45,14 @@ namespace LiveStreamBlazorApp.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            await ConnectToNotificationServer();
-            try
-            {
-                LiveStreams = await http.GetJsonAsync<List<LiveStream>>(DbLiveStreamsUrl);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
+            var watch = Stopwatch.StartNew();
+            await ConnectToNotificationServerAsync();
+            await ConnectToMedaiDbServerAsync();
+            await OnUpdateLiveStreamsAsync();
+            Timetaken = $"'OnInitializedAsync()' timetaken:  {watch.ElapsedMilliseconds}";
         }
 
-        protected async Task UpdateLiveStreams()
+        protected async Task OnUpdateLiveStreamsAsync()
         {
             LiveStreams = await http.GetJsonAsync<List<LiveStream>>(DbLiveStreamsUrl);
         }
@@ -73,27 +72,32 @@ namespace LiveStreamBlazorApp.Pages
         {
             NotificationServerConnectionStatus = "Connected";
             NotificationServerConnectionStatusColor = "green";
+            NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Connected" ;
         }
 
         protected void OnNotificationServerDisconnectedUI()
         {
             NotificationServerConnectionStatus = "Disconnected";
             NotificationServerConnectionStatusColor = "red";
+            NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Disconnected";
         }
 
         protected void OnMediaDbServerConnectedUI()
         {
             MediaDbServerConnectionStatus = "Connected";
             MediaDbServerConnectionStatusColor = "green";
+            MediaDbNotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Connected";
         }
 
         protected void OnMediaDbServerDisconnectedUI()
         {
             MediaDbServerConnectionStatus = "Disconnected";
             MediaDbServerConnectionStatusColor = "red";
+            MediaDbNotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Disonnected";
+
         }
 
-        protected async Task ConnectToNotificationServer()
+        protected async Task ConnectToNotificationServerAsync()
         {
             notificationServerConnection = new HubConnectionBuilder().WithUrl(notificationServerUrl).Build();
 
@@ -113,7 +117,7 @@ namespace LiveStreamBlazorApp.Pages
             });
         }
 
-        protected async Task ConnectToMedaiDbServer()
+        protected async Task ConnectToMedaiDbServerAsync()
         {
             mediaDbServerConnection = new HubConnectionBuilder().WithUrl(MedaiDbServerUrl).Build();
 
@@ -126,10 +130,10 @@ namespace LiveStreamBlazorApp.Pages
                 OnMediaDbServerDisconnectedUI();
             };
 
-            mediaDbServerConnection.On<string>("dbupdate", async (msg) =>
+            mediaDbServerConnection.On<string>("dbupdate",async msg =>
             {
                 MediaDbNotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  " + msg;
-                await UpdateLiveStreams();
+                await OnUpdateLiveStreamsAsync();
                 StateHasChanged();
             });
         }

@@ -1,0 +1,29 @@
+[
+  {
+    "outputFileName": "wwwroot/css/site.min.css",
+    "inputFiles": [
+      "node_modules/video.js/dist/video-js.min.css"
+      //"node_modules/bootstrap/dist/css/bootstrap.css"
+      //example.com/path/to/video-js.min.css
+    ],
+    "minify": { "enabled": false }
+
+  },
+  {
+    "outputFileName": "wwwroot/js/site.min.js",
+    "inputFiles": [
+      "node_modules/video.js/dist/video.min.js"
+      //"node_modules/jquery/dist/jquery.min.js",
+      //"node_modules/popper.js/dist/umd/popper.min.js",
+      //"node_modules/bootstrap/dist/js/bootstrap.js"
+
+      //example.com/path/to/videojs-vtt.js
+      //example.com/path/to/video.min.js
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  }
+]

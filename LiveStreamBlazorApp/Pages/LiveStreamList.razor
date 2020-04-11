@@ -2,23 +2,6 @@
 @inherits LiveStreamListBase
 
 <h3>Live Streams</h3>
-<button class="btn btn-primary" @onclick="@ConnectToServer" disabled="@isConnected">Connect</button>
-<table>
-    <tr>
-        <th>Connection Status:</th>
-        <td>@connectionStatus</td>
-
-        <th>Messages:</th>
-
-        @foreach (var msg in notifications)
-        {
-            <td>@msg</td>
-        }
-    </tr>
-</table>
-
-<h4></h4>
-
 <div>
 
 </div>
@@ -47,6 +30,8 @@
         <td>
             <font color="@NotificationServerConnectionStatusColor">@NotificationServerConnectionStatus</font>
         </td>
+    </tr>
+    <tr>
         <th>
             Database Notification:
         </th>
@@ -54,6 +39,7 @@
             @MediaDbNotificationMsg
         </td>
     </tr>
+
 
 </table>
 
@@ -70,6 +56,7 @@ else
             <th>Title</th>
             <th>Description</th>
             <th>Source</th>
+            <th>Date Published</th>
         </tr>
         @foreach (var livestream in LiveStreams)
         {
@@ -78,12 +65,14 @@ else
                 <td>@livestream.Title</td>
                 <td>@livestream.Description</td>
                 <td>@livestream.Url</td>
+                <td>@livestream.DatePublished</td>
             </tr>
         }
     </table>
 
 }
 <button class="btn btn-primary" @onclick="@AddNewStream">Add New Stream</button>
+<a>@Timetaken</a>
 
 @if (modalType == ModalType.Create)
 {

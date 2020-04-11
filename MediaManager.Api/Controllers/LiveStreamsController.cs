@@ -117,9 +117,7 @@ namespace MediaManager.Api.Controllers
                     return BadRequest();
                 }
                 var createdLiveStream = await liveStreamRepository.AddLiveStream(liveStream);
-                hubContext.Clients.All.SendAsync("dbupdate", "A new live stream has been added!");
-
-
+                await hubContext.Clients.All.SendAsync("dbupdate", "A new live stream has been added!");
                 return CreatedAtAction(nameof(GetLiveStream), new { id = createdLiveStream.Id}, createdLiveStream );
             }
             catch (Exception)
