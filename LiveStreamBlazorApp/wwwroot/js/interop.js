@@ -12,3 +12,27 @@
 function createAlert(text) {
     alert(text);
 }
+
+function previewPlayer(videoplayer) {
+    videoplayer.fluid(true);
+    videoplayer.control(true);
+}
+
+window.videoplayer = {
+    previewPlayer: function (elementid) {
+        var video = videojs(elementid, {
+            loop: 'true',
+            name: 'playername'
+        });
+    }
+}
+
+
+
+//function InitPage() {
+//    $(function () {
+//        var video = videojs('previewPlayer').click(function () {
+//      ...code to execute on a button click...
+//    });
+//});
+//}

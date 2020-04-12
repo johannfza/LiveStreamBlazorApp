@@ -71,12 +71,7 @@ else
     </table>
 
 }
-<button class="btn btn-primary" @onclick="@AddNewStream">Add New Stream</button>
+<button class="btn btn-primary" @onclick="() => LiveStreamModalCreateEdit.Open()">Add New Stream</button>
 <a>@Timetaken</a>
 
-@if (modalType == ModalType.Create)
-{
-
-    <LiveStreamModalCreateEdit OnCloseModal="@OnCloseModalCallback" ModalTitle="Add Live Stream"></LiveStreamModalCreateEdit>
-
-}
+<LiveStreamModalCreateEdit OnCloseModal="@OnCloseModalCallback" @ref="LiveStreamModalCreateEdit" ModalTitle="Add Live Stream"></LiveStreamModalCreateEdit>

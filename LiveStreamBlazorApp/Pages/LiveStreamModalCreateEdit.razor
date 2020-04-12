@@ -1,29 +1,18 @@
 ﻿@inherits LiveStreamModalCreateEditBase
 
-<div class="modal" tabindex="-1" style="display:block" role="dialog">
-    <div class="modal-dialog modal-xl">
+<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay"  aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">@ModalTitle</h3>
-                <button type="button" class="close" @onclick="@CloseModal">
+                <button type="button" class="close" @onclick="@Close">
                     <span aria-hidden="true">X</span>
                 </button>
             </div>
             <div class="modal-body">
                 @*<-- --> Video PLayer </-->*@
-                <video id="previewPlayer"
-                       class="video-js"
-                       controls
-                       autoplay="autoplay"
-                       preload="auto"
-                       width="720"
-                       height="405"
-                       poster=""
-                       fluid=""
-                       data-setup="{}"
-                       >
-
-                    <source src="media/BrownEyedLover.mp4" type="video/mp4" />
+                <video id="previewPlayer" @ref="previewPlayer" class="video-js vjs-16-9 vjs-big-play-centered" controls preload="auto" data-setup="{}">
+                    <source src="@liveStream.Url" type="application/x-mpegURL" />
                     @*<source src="MY_VIDEO.webm" type="video/webm" />*@
                     <p class="vjs-no-js">
                         To view this video please enable JavaScript, and consider upgrading to a
@@ -81,4 +70,9 @@
         </div>
     </div>
 </div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
 

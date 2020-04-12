@@ -27,16 +27,21 @@ namespace LiveStreamBlazorApp.Pages
         public string MediaDbNotificationMsg = string.Empty;
 
         //ApiEnpoints
-        private string DbLiveStreamsUrl = "https://localhost:44354/api/livestreams";
+        private readonly string DbLiveStreamsUrl = "https://localhost:44354/api/livestreams";
 
         //ServerHubUrl
-        private string notificationServerUrl = "https://localhost:44354/notificationhub" ;
-        private string MedaiDbServerUrl = "https://localhost:44354/mediadbhub";
+        private readonly string notificationServerUrl = "https://localhost:44354/notificationhub" ;
+        private readonly string MedaiDbServerUrl = "https://localhost:44354/mediadbhub";
 
         protected ModalType modalType = ModalType.None;
 
+        protected ElementReference previewPlayer;
+
+        //components
+        protected LiveStreamModalCreateEdit LiveStreamModalCreateEdit { get; set; }
+
         [Inject]
-        protected HttpClient http { get; set; }
+        protected HttpClient Http { get; set; }
 
         HubConnection notificationServerConnection = null;
         HubConnection mediaDbServerConnection = null;
@@ -49,17 +54,29 @@ namespace LiveStreamBlazorApp.Pages
             await ConnectToNotificationServerAsync();
             await ConnectToMedaiDbServerAsync();
             await OnUpdateLiveStreamsAsync();
+            await base.OnInitializedAsync();
             Timetaken = $"'OnInitializedAsync()' timetaken:  {watch.ElapsedMilliseconds}";
+        }
+
+        protected override Task OnAfterRenderAsync(bool firstRender)
+        {
+            return base.OnAfterRenderAsync(firstRender);
         }
 
         protected async Task OnUpdateLiveStreamsAsync()
         {
-            LiveStreams = await http.GetJsonAsync<List<LiveStream>>(DbLiveStreamsUrl);
+            LiveStreams = await Http.GetJsonAsync<List<LiveStream>>(DbLiveStreamsUrl);
         }
 
         protected void AddNewStream()
         {
             modalType = ModalType.Create;
+            //StateHasChanged();
+        }
+
+        protected void OnOpenModalCallback(string msg)
+        {
+            StateHasChanged();
         }
 
         protected void OnCloseModalCallback(string msg)
