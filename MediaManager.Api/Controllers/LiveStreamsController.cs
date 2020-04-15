@@ -19,11 +19,13 @@ namespace MediaManager.Api.Controllers
     {
         private readonly ILiveStreamRepository liveStreamRepository;
         private readonly IHubContext<MediaDbHub> hubContext;
+        private readonly IHubContext<NotificationHub> notificationHubContext;
 
-        public LiveStreamsController(ILiveStreamRepository liveStreamRepository, IHubContext<MediaDbHub> hubcontext)
+        public LiveStreamsController(ILiveStreamRepository liveStreamRepository, IHubContext<MediaDbHub> hubcontext, IHubContext<NotificationHub> notificationHubContext)
         {
             this.liveStreamRepository = liveStreamRepository;
             this.hubContext = hubcontext;
+            this.notificationHubContext = notificationHubContext;
         }
 
 
@@ -117,9 +119,9 @@ namespace MediaManager.Api.Controllers
                     return BadRequest();
                 }
                 var createdLiveStream = await liveStreamRepository.AddLiveStream(liveStream);
-                hubContext.Clients.All.SendAsync("dbupdate", "A new live stream has been added!");
-
-
+                await hubContext.Clients.All.SendAsync("dbupdate", "A new live stream has been added!");
+                await notificationHubContext.Clients.All.SendAsync("notification", $"LIVE: {createdLiveStream.Title}");
+                await notificationHubContext.Clients.All.SendAsync("newlivestreamnotification", createdLiveStream);
                 return CreatedAtAction(nameof(GetLiveStream), new { id = createdLiveStream.Id}, createdLiveStream );
             }
             catch (Exception)

@@ -1,0 +1,106 @@
+﻿@page "/notifications"
+
+<h3>Notifications</h3>
+<table class="table table-striped">
+    <tr>
+        <th>
+            Notification Connetion Status:
+        </th>
+        <td>
+            <font color="@NotificationServerConnectionStatusColor">@NotificationServerConnectionStatus</font>
+        </td>
+    </tr>
+
+    @foreach (string msg in NotificationMsgs)
+    {
+        <tr>
+            <td>
+                @msg
+            </td>
+        </tr>
+    }
+</table>
+
+    @code {
+
+        //Diagnostics 
+        public string Timetaken = string.Empty;
+
+        //UI
+        public string CallbackMsg = string.Empty;
+        public string NotificationServerConnectionStatus = "Not Connected";
+        public string NotificationServerConnectionStatusColor = "black";
+        public List<string> NotificationMsgs = new List<string>();
+        public string MediaDbServerConnectionStatus = "Not Connected";
+        public string MediaDbServerConnectionStatusColor = "black";
+        public string MediaDbNotificationMsg = string.Empty;
+
+        //ApiEnpoints
+        private readonly string DbLiveStreamsUrl = "https://localhost:44354/api/livestreams";
+
+        //ServerHubUrl
+        private readonly string notificationServerUrl = "https://localhost:44354/notificationhub";
+        private readonly string MedaiDbServerUrl = "https://localhost:44354/mediadbhub";
+
+        protected ModalType modalType = ModalType.None;
+
+        protected ElementReference previewPlayer;
+
+        //components
+        protected LiveStreamModalCreateEdit LiveStreamModalCreateEdit { get; set; }
+
+        [Inject]
+        protected HttpClient Http { get; set; }
+
+        HubConnection notificationServerConnection = null;
+        HubConnection mediaDbServerConnection = null;
+
+        protected override async Task OnInitializedAsync()
+        {
+            var watch = Stopwatch.StartNew();
+            await ConnectToNotificationServerAsync();
+            await base.OnInitializedAsync();
+            Timetaken = $"'OnInitializedAsync()' timetaken:  {watch.ElapsedMilliseconds}";
+        }
+
+
+        protected void OnNotificationServerConnectedUI()
+        {
+            NotificationServerConnectionStatus = "Connected";
+            NotificationServerConnectionStatusColor = "green";
+            NotificationMsgs.Add(DateTime.UtcNow.ToLocalTime().ToString() + ":  Connected");
+        }
+
+        protected void OnNotificationServerDisconnectedUI()
+        {
+            NotificationServerConnectionStatus = "Disconnected";
+            NotificationServerConnectionStatusColor = "red";
+            NotificationMsgs.Add(DateTime.UtcNow.ToLocalTime().ToString() + ":  Disconnected");
+        }
+
+        protected async Task ConnectToNotificationServerAsync()
+        {
+            notificationServerConnection = new HubConnectionBuilder().WithUrl(notificationServerUrl).Build();
+
+            await notificationServerConnection.StartAsync();
+            OnNotificationServerConnectedUI();
+
+            notificationServerConnection.Closed += async (s) =>
+            {
+                await notificationServerConnection.StartAsync();
+                OnNotificationServerDisconnectedUI();
+            };
+
+            notificationServerConnection.On<string>("notification", msg =>
+            {
+                NotificationMsgs.Add(DateTime.UtcNow.ToLocalTime().ToString() + ":  " + msg);
+                StateHasChanged();
+            });
+
+            notificationServerConnection.On<LiveStream>("newlivestreamnotification", ls =>
+            {
+                NotificationMsgs.Add(DateTime.UtcNow.ToLocalTime().ToString() + ":  Object:" + ls.ToString());
+                StateHasChanged();
+            });
+        }
+    }
