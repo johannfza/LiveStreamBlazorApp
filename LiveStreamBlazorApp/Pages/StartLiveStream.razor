@@ -1,0 +1,244 @@
+﻿@page "/"
+
+<h3>@Title</h3>
+
+<tr>
+    <th>
+        Notification Connetion Status:
+    </th>
+    <td>
+        <font color="@NotificationServerConnectionStatusColor">@NotificationServerConnectionStatus</font>
+    </td>
+</tr>
+<tr>
+    <th>
+        Notification:
+    </th>
+    <td>
+        @NotificationMsg
+    </td>
+</tr>
+<div>
+    @*<-- --> Video PLayer </-->*@
+
+    @if (IsLive)
+    {
+        <div>
+            <font color=red>Live Now</font>
+        </div>
+
+    }
+
+    @if (!HasGoneLive)
+    {
+        <video id="vidInput" muted="true"></video>
+    }
+
+    <video hidden="@ShowRecordedVideo" id="vidSave" controls ></video>
+
+    <div>
+        <button hidden="@Hidden" class="btn btn-block btn-info" id="btnStop" @onclick="@EndStreamAsync">End Live</button>
+    </div>
+
+
+    <EditForm Model="@liveStream" OnValidSubmit="@SubmitLiveStream">
+
+        @if (!HasGoneLive)
+        {
+            @if (!IsLive)
+            {
+                <div>
+                    <button class="btn btn-block btn-info" type="submit" id="btnStart">Go Live</button>
+                </div>
+            }
+
+        }
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label>Title</label>
+            <InputText class="form-control" @bind-Value="liveStream.Title" placeholder="Title of stream" disabled="@IsDisabled" />
+            <ValidationMessage For="@(()=>liveStream.Title)" />
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <InputTextArea class="form-control" @bind-Value="liveStream.Description" placeholder="Description" disabled="@IsDisabled" />
+            <ValidationMessage For="@(() => liveStream.Description)" />
+        </div>
+        <div class="form-group">
+            <label>RTMP Url</label>
+            <div class="input-group mb-3">
+                <input class="form-control" id="StreamUrl" value="@StreamUrl" disabled="@IsDisabled" />
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, "StreamUrl"))">Copy</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Stream Key</label>
+            <small class="form-text text-muted">Stream key is dynamic.</small>
+            <div class="input-group">
+                <input class="form-control" id="StreamKey" value="@StreamKey" @oninput="@UpdateStreamUrl" disabled="@IsDisabled" />
+                <div class="form-group input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, "StreamKey"))">Copy</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Live Stream Url</label>
+            <small class="form-text text-muted">After it's published</small>
+            <div class="input-group">
+                <InputText class="form-control" id="@liveStream.Url" @bind-Value="liveStream.Url" readonly />
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, liveStream.Url))">Copy</button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+
+
+@code {
+    protected static string ServerAddress = "139.162.24.99";
+    protected static string Port = "443";
+    protected static string AppName = "live";
+    protected static ServerApplication StreamServer = new ServerApplication(ServerAddress, Port, AppName);
+
+    protected bool ShowRecordedVideo { get; set; } = true;
+
+    protected bool Hidden { get; set; } = true;
+
+    protected bool HasGoneLive { get; set; } = false;
+
+    protected bool IsDisabled { get; set; } = false;
+
+    protected bool IsLive { get; set; } = false;
+
+    //ServerHubUrl
+    private readonly string notificationServerUrl = "https://localhost:5001/notificationhub";
+
+    HubConnection notificationServerConnection = null;
+    public string NotificationServerConnectionStatus = "Not Connected";
+    public string NotificationServerConnectionStatusColor = "black";
+    public string NotificationMsg = string.Empty;
+
+    [Inject]
+    protected HttpClient Http { get; set; }
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; }
+
+    public string StreamUrl = $"rtmp://{StreamServer.Address}/{StreamServer.AppName}";
+
+    public string RecorderedUrl = "Processing Recording";
+
+    [Parameter]
+    public string StreamKey { get; set; } = "";
+    public LiveStream liveStream = new LiveStream();
+    protected ElementReference previewPlayer;
+
+    [Parameter]
+    public string Title { get; set; } = "LiveStream";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConnectToNotificationServerAsync();
+        await base.OnInitializedAsync();
+        StreamKey = Guid.NewGuid().ToString();
+        liveStream.Url = $"https://{StreamServer.Address}:{StreamServer.Port}/hls/{StreamKey}.m3u8";
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            //await JSRuntime.InvokeVoidAsync("videoplayer.previewPlayer", "previewPlayer");
+            await JSRuntime.InvokeVoidAsync("webcam.oninit");
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected async Task SubmitLiveStream()
+    {
+        IsLive = true;
+        IsDisabled = true;
+        Hidden = false;
+        liveStream.DatePublished = DateTime.UtcNow.ToLocalTime().ToString();
+        var response = await Http.PostJsonAsync<LiveStream>("https://localhost:5001/api/livestreams", liveStream);
+        Debug.WriteLine(response.ToString());
+
+    }
+    protected async Task EndStreamAsync()
+    {
+        IsLive = false;
+        HasGoneLive = true;
+        Hidden = true;
+        ShowRecordedVideo = false;
+        await Http.PostAsync("https://localhost:5001/api/notification?msg=The stream has ended", null);
+        StateHasChanged();
+
+    }
+
+    protected async void Load()
+    {
+        await JSRuntime.InvokeVoidAsync("loadPlayer", "previewPlayer", liveStream.Url);
+    }
+
+    protected async Task CopyToClipboard(MouseEventArgs e, string id)
+    {
+        await JSRuntime.InvokeVoidAsync("copyToClipboard", id);
+        //await JSRuntime.InvokeVoidAsync("createAlert","Copied to clipboard");
+    }
+
+    protected void UpdateStreamUrl(ChangeEventArgs args)
+    {
+        StreamKey = args.Value.ToString();
+        liveStream.Url = $"https://{StreamServer.Address}:{StreamServer.Port}/hls/{StreamKey}.m3u8";
+        StateHasChanged();
+    }
+
+    protected void OnNotificationServerConnectedUI()
+    {
+        NotificationServerConnectionStatus = "Connected";
+        NotificationServerConnectionStatusColor = "green";
+        NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Connected";
+    }
+
+    protected void OnNotificationServerDisconnectedUI()
+    {
+        NotificationServerConnectionStatus = "Disconnected";
+        NotificationServerConnectionStatusColor = "red";
+        NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Disconnected";
+    }
+
+    protected async Task ConnectToNotificationServerAsync()
+    {
+        notificationServerConnection = new HubConnectionBuilder().WithUrl(notificationServerUrl).Build();
+
+        await notificationServerConnection.StartAsync();
+        OnNotificationServerConnectedUI();
+
+        notificationServerConnection.Closed += async (s) =>
+        {
+            await notificationServerConnection.StartAsync();
+            OnNotificationServerDisconnectedUI();
+        };
+
+        notificationServerConnection.On<string>("notification", msg =>
+        {
+            NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  " + msg;
+            StateHasChanged();
+        });
+    }
+
+    [JSInvokable]
+    public static Task<Object> OnLiveStreamDataAvailable()
+    {
+        var data = Task.FromResult(new Object());
+        Debug.WriteLine("From OnLiveStreamDataAvailable: "+ data.ToString());
+        return data;
+    }
+
+}
