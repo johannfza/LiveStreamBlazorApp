@@ -18,7 +18,7 @@ namespace MediaManager.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("MediaModelLibrary.LiveStream", b =>
+            modelBuilder.Entity("MediaModels.LiveStream", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -29,12 +29,19 @@ namespace MediaManager.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StreamKey")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Url")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Views")
@@ -48,8 +55,9 @@ namespace MediaManager.Api.Migrations
                         new
                         {
                             Id = 1,
-                            DatePublished = "4/7/2020 5:08:17 PM",
+                            DatePublished = "05/05/2020 13:18:45",
                             Description = "This is Live Stream 1",
+                            StreamKey = "key1",
                             Title = "LiveStream 1",
                             Url = "http://www.golive.com/1",
                             Views = 0
@@ -57,8 +65,9 @@ namespace MediaManager.Api.Migrations
                         new
                         {
                             Id = 2,
-                            DatePublished = "4/7/2020 5:08:17 PM",
+                            DatePublished = "05/05/2020 13:18:45",
                             Description = "This is Live Stream 2",
+                            StreamKey = "key2",
                             Title = "LiveStream 2",
                             Url = "http://www.golive.com/2",
                             Views = 0
@@ -66,8 +75,9 @@ namespace MediaManager.Api.Migrations
                         new
                         {
                             Id = 3,
-                            DatePublished = "4/7/2020 5:08:17 PM",
+                            DatePublished = "05/05/2020 13:18:45",
                             Description = "This is Live Stream 3",
+                            StreamKey = "key3",
                             Title = "LiveStream 3",
                             Url = "http://www.golive.com/3",
                             Views = 0
@@ -75,8 +85,9 @@ namespace MediaManager.Api.Migrations
                         new
                         {
                             Id = 4,
-                            DatePublished = "4/7/2020 5:08:17 PM",
+                            DatePublished = "05/05/2020 13:18:45",
                             Description = "This is Live Stream 4",
+                            StreamKey = "key4",
                             Title = "LiveStream 4",
                             Url = "http://www.golive.com/4",
                             Views = 0
