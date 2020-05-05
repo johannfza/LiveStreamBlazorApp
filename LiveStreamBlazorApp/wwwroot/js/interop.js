@@ -317,7 +317,9 @@ function oninitstartlivestreampage() {
                 console.log = "getrecordingurl"
                 let vidSave = document.getElementById('vidSave');
                 vidSave.src = recordingUrl;
+
                 return recordingUrl;
+
 
             }
 
@@ -325,7 +327,7 @@ function oninitstartlivestreampage() {
                 chunks.push(ev.data);
             }
             mediaRecorder.onstop = (ev) => {
-               let blob = new Blob(chunks, { 'type': 'video/mp4;' });
+                let blob = new Blob(chunks, { 'type': 'video/mp4' });
 
                 DotNet.invokeMethodAsync('LiveStreamBlazorApp', 'RecordedData').then(data => {
                     console.log("sent");
@@ -349,6 +351,28 @@ function oninitstartlivestreampage() {
                     }); 
                 }
             }
+
+            window.download = download;
+
+            function download(bloburl, filename) {
+                var a = document.createElement("a");
+                a.href = bloburl;
+                a.download = filename;
+                a.click();
+
+            }
+
+            function downloadtemplate(blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                document.body.appendChild(a);
+                a.style = "display: none";
+                a.href = url;
+                a.download = "test.mp4";
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+
         })
         .catch(function (err) {
             console.log(err.name, err.message);

@@ -47,7 +47,7 @@
 
                             <video width="100%" id="vidSave" controls></video>
                         </div>
-
+                        <button id="Download" @onclick="@DownloadVideo">Download</button>
                     }
 
                     @if (broadcastState == BroadcastState.Preview || broadcastState == BroadcastState.Live)
@@ -159,6 +159,10 @@
     public string NotificationMsg { get; set; } = string.Empty;
     public string NotificationServerConnectionStatus { get; set; } = "Not Connected";
 
+    public string BlobURL = "";
+
+    public bool firstRenderAfterEnded = true;
+
     //UI_Logic
     protected bool IsDisabled { get; set; } = false;
 
@@ -186,9 +190,10 @@
             StateHasChanged();
         }
 
-        if (broadcastState == BroadcastState.Ended)
+        if (broadcastState == BroadcastState.Ended && firstRenderAfterEnded)
         {
             await LoadRecordedeVideoAsync();
+            firstRenderAfterEnded = false;
         }
         await base.OnAfterRenderAsync(firstRender);
     }
@@ -213,17 +218,14 @@
     protected async Task EndStreamAsync()
     {
         broadcastState = BroadcastState.Ended;
-        StateHasChanged();
         await JSRuntime.InvokeVoidAsync("stoplivestream");
         await Http.PostAsync("https://localhost:5001/api/notification?msg=The stream has ended", null);
-
-        await LoadRecordedeVideoAsync();
     }
 
     protected async Task LoadRecordedeVideoAsync()
     {
-        string src = await JSRuntime.InvokeAsync<string>("getrecordingurl");
-        Console.WriteLine(TAG + "LoadRecordedeVideoAsync: " + src);
+        BlobURL = await JSRuntime.InvokeAsync<string>("getrecordingurl");
+        Debug.WriteLine(TAG + "LoadRecordedeVideoAsync: " + BlobURL);
     }
 
     protected async void Load()
@@ -278,13 +280,19 @@
         });
     }
 
+    protected async Task DownloadVideo()
+    {
+        Debug.WriteLine(TAG + "DownloadVideo: Downloading");
+        await JSRuntime.InvokeVoidAsync("download", BlobURL, $"{liveStream.Title}_{liveStream.StreamKey}.mp4");
+    }
+
     [JSInvokable]
     public static Task<byte[]> OnLiveStreamDataAvailable()
     {
 
         var data = Task.FromResult(new byte[1000]);
 
-        Debug.WriteLine("From OnLiveStreamDataAvailable: " + data.GetType());
+        Debug.WriteLine(TAG + "OnLiveStreamDataAvailable: ");
         return data;
     }
 
@@ -295,6 +303,4 @@
         Debug.WriteLine("From RecordedData: " + data.GetType());
         Debug.WriteLine("From RecordedData: " + data.Length);
     }
-
-
 }
