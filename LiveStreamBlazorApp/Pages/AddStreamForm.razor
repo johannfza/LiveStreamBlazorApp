@@ -34,7 +34,7 @@
 
     protected async Task<LiveStream> SaveNewStream()
     {
-        var savedStream = await http.PostJsonAsync<LiveStream>("http://localhost:50395/api/livestreams", NewStream);
+        var savedStream = await http.PostJsonAsync<LiveStream>("https://localhost:5001/api/livestreams", NewStream);
         Debug.WriteLine(savedStream.ToString());
         return savedStream;
     }

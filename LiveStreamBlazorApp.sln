@@ -5,33 +5,47 @@ VisualStudioVersion = 16.0.29920.165
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveStreamBlazorApp", "LiveStreamBlazorApp\LiveStreamBlazorApp.csproj", "{B4FA478B-6256-498E-863C-D0298D819FF4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaModelLibrary", "..\MediaModelLibrary\MediaModelLibrary\MediaModelLibrary.csproj", "{BD124F7F-0BDD-4956-B1C0-A0CB0A4302BB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaManager.Api", "MediaManager.Api\MediaManager.Api.csproj", "{EC00FE2B-8155-42E7-AA73-D62DCB859D48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaModels", "MediaModels\MediaModels.csproj", "{42C3BEDE-5A56-41EC-9686-FCD4B91AB5CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Default|Any CPU = Default|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B4FA478B-6256-498E-863C-D0298D819FF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B4FA478B-6256-498E-863C-D0298D819FF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4FA478B-6256-498E-863C-D0298D819FF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4FA478B-6256-498E-863C-D0298D819FF4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD124F7F-0BDD-4956-B1C0-A0CB0A4302BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD124F7F-0BDD-4956-B1C0-A0CB0A4302BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD124F7F-0BDD-4956-B1C0-A0CB0A4302BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD124F7F-0BDD-4956-B1C0-A0CB0A4302BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4FA478B-6256-498E-863C-D0298D819FF4}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4FA478B-6256-498E-863C-D0298D819FF4}.Default|Any CPU.Build.0 = Debug|Any CPU
 		{EC00FE2B-8155-42E7-AA73-D62DCB859D48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EC00FE2B-8155-42E7-AA73-D62DCB859D48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC00FE2B-8155-42E7-AA73-D62DCB859D48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC00FE2B-8155-42E7-AA73-D62DCB859D48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC00FE2B-8155-42E7-AA73-D62DCB859D48}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC00FE2B-8155-42E7-AA73-D62DCB859D48}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{42C3BEDE-5A56-41EC-9686-FCD4B91AB5CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42C3BEDE-5A56-41EC-9686-FCD4B91AB5CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42C3BEDE-5A56-41EC-9686-FCD4B91AB5CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42C3BEDE-5A56-41EC-9686-FCD4B91AB5CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42C3BEDE-5A56-41EC-9686-FCD4B91AB5CA}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{42C3BEDE-5A56-41EC-9686-FCD4B91AB5CA}.Default|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {23AFA5D6-F55A-4FBA-B206-CC2FB4D318BD}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.StandardHeader = $2
+		$0.VersionControlPolicy = $3
 	EndGlobalSection
 EndGlobal

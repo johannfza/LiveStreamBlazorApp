@@ -23,7 +23,7 @@ namespace MediaManager.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromQuery] string msg)
         {
-            await hubcontext.Clients.All.SendAsync("notifiation", msg);
+            await hubcontext.Clients.All.SendAsync("notification", msg);
             return Ok($"notification with content '{msg}' has been sent successfully!");
         }
 

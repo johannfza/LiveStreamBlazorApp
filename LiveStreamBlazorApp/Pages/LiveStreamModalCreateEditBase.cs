@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MediaModelLibrary;
+using MediaModels;
 using System.Net.Http;
 using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Components.Web;
@@ -17,12 +17,12 @@ namespace LiveStreamBlazorApp.Pages
     {
 
         //Media Database Server 
-
+        
 
         //StreamServer
-        protected static string ServerAddress = "192.168.56.101";
+        protected static string ServerAddress = "139.162.24.99";
         protected static string Port = "443";
-        protected static string AppName = "show";
+        protected static string AppName = "live";
         protected static ServerApplication StreamServer = new ServerApplication(ServerAddress, Port, AppName);
 
 
@@ -66,8 +66,9 @@ namespace LiveStreamBlazorApp.Pages
         {
             if (firstRender) 
             {
-                await JSRuntime.InvokeVoidAsync("videoplayer.previewPlayer", "previewPlayer");
-                StateHasChanged();
+                //await JSRuntime.InvokeVoidAsync("videoplayer.previewPlayer", "previewPlayer");
+                //await JSRuntime.InvokeVoidAsync("webcam.oninit");
+                //StateHasChanged();
             }
             await base.OnAfterRenderAsync(firstRender);
         }
@@ -94,7 +95,7 @@ namespace LiveStreamBlazorApp.Pages
         protected async Task SubmitLiveStream()
         {
             liveStream.DatePublished = DateTime.UtcNow.ToLocalTime().ToString();
-            var response = await Http.PostJsonAsync<LiveStream>("https://localhost:44354/api/livestreams", liveStream);
+            var response = await Http.PostJsonAsync<LiveStream>("https://localhost:5001/api/livestreams", liveStream);
             Debug.WriteLine(response.ToString());
             Close();
         }

@@ -1,4 +1,4 @@
-﻿using MediaModelLibrary;
+﻿using MediaModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

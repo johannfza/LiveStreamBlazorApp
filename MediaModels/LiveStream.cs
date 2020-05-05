@@ -12,6 +12,9 @@ namespace MediaModels
         public string Description { get; set; }
         [Required]
         public string Url { get; set; }
+        [Required]
+        public string StreamKey { get; set; }
+
         public string DatePublished { get; set; }
         public int Views { get; set; }
 
@@ -19,7 +22,7 @@ namespace MediaModels
         {
         }
 
-        public LiveStream(int id, string title, string description, string url)
+        public LiveStream(int id, string title, string description, string url, string streamKey)
         {
             Id = id;
             Title = title;
@@ -27,6 +30,7 @@ namespace MediaModels
             Url = url;
             DatePublished = DateTime.UtcNow.ToLocalTime().ToString();
             Views = 0;
+            StreamKey = streamKey;
 
         }
 

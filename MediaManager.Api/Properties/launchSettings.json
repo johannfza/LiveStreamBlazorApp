@@ -20,7 +20,7 @@
     "MediaManager.Api": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchUrl": "api/livestreams",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

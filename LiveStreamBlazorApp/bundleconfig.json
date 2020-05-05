@@ -2,7 +2,11 @@
   {
     "outputFileName": "wwwroot/css/site.min.css",
     "inputFiles": [
-      "node_modules/video.js/dist/video-js.css"
+      "node_modules/video-record/dist/css/videojs.record.css",
+      "node_modules/video.js/dist/video-js.min.css"
+
+
+
       //"node_modules/bootstrap/dist/css/bootstrap.css"
       //example.com/path/to/video-js.min.css
     ],
@@ -13,7 +17,9 @@
     "outputFileName": "wwwroot/js/site.min.js",
     "inputFiles": [
       "node_modules/video.js/dist/video.js",
-      "node_modules/@videojs/http-streaming/dist/videojs-http-streaming.js"
+      "node_modules/recordrtc/RecordRTC.js",
+      "node_modules/webrtc-adapter/out/adapter.js",
+      "node_modules/videojs-record/dist/videojs.record.js"
 
       //"node_modules/jquery/dist/jquery.min.js",
       //"node_modules/popper.js/dist/umd/popper.min.js",

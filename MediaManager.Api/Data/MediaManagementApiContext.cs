@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MediaModelLibrary;
+using MediaModels;
 
 namespace MediaManager.Api.Data
 {
@@ -22,7 +22,7 @@ namespace MediaManager.Api.Data
             base.OnModelCreating(modelBuilder);
             for (int i = 1; i < 5; i++)
             {
-                modelBuilder.Entity<LiveStream>().HasData(new LiveStream(i, $"LiveStream {i}", $"This is Live Stream {i}", "http://www.golive.com/" + i));
+                modelBuilder.Entity<LiveStream>().HasData(new LiveStream(i, $"LiveStream {i}", $"This is Live Stream {i}", $"http://www.golive.com/" + i.ToString(), "key"+i.ToString()));
 
             }
         }

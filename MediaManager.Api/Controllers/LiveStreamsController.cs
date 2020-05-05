@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MediaManager.Api.Data;
-using MediaModelLibrary;
+using MediaModels;
 using System.Diagnostics;
 using MediaManager.Api.SignalR;
 using Microsoft.AspNetCore.SignalR;

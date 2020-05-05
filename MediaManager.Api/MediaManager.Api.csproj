@@ -9,7 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MediaModelLibrary\MediaModelLibrary\MediaModelLibrary.csproj" />
+    <ProjectReference Include="..\MediaModels\MediaModels.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

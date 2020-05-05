@@ -1,5 +1,5 @@
 ﻿using LiveStreamBlazorApp.Models;
-using MediaModelLibrary;
+using MediaModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -27,11 +27,11 @@ namespace LiveStreamBlazorApp.Pages
         public string MediaDbNotificationMsg = string.Empty;
 
         //ApiEnpoints
-        private readonly string DbLiveStreamsUrl = "https://localhost:44354/api/livestreams";
+        private readonly string DbLiveStreamsUrl = "https://localhost:5001/api/livestreams";
 
         //ServerHubUrl
-        private readonly string notificationServerUrl = "https://localhost:44354/notificationhub" ;
-        private readonly string MedaiDbServerUrl = "https://localhost:44354/mediadbhub";
+        private readonly string notificationServerUrl = "https://localhost:5001/notificationhub";
+        private readonly string MedaiDbServerUrl = "https://localhost:5001/mediadbhub";
 
         protected ModalType modalType = ModalType.None;
 

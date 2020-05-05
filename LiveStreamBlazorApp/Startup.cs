@@ -55,6 +55,7 @@ namespace LiveStreamBlazorApp
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
+
             });
         }
     }

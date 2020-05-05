@@ -1,5 +1,7 @@
 ﻿@inherits LiveStreamModalCreateEditBase
 
+
+
 <div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay"  aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content">
@@ -11,16 +13,7 @@
             </div>
             <div class="modal-body">
                 @*<-- --> Video PLayer </-->*@
-                <video id="previewPlayer" @ref="previewPlayer" preload="none" class="video-js vjs-16-9 vjs-big-play-centered">
-                    <source src="@liveStream.Url" type="application/x-mpegURL" />
-                    @*<source src="MY_VIDEO.webm" type="video/webm" />*@
-                    <p class="vjs-no-js">
-                        To view this video please enable JavaScript, and consider upgrading to a
-                        web browser that
-                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-                    </p>
-                </video>
-                <button class="btn btn-block btn-info" @onclick="@Load">Load</button>
+                <video id="myVideo" ></video>
                 <EditForm Model="@liveStream" OnValidSubmit="@SubmitLiveStream">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
