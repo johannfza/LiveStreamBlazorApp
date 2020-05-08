@@ -392,3 +392,11 @@ function oninitstartlivestreampage() {
 
 }
 
+
+window.tolatestmsg = tolatestmsg;
+
+function tolatestmsg() {
+    console.log(tolatestmsg);
+    var objDiv = document.getElementById("chat-content");
+    objDiv.scrollTop = objDiv.scrollHeight;
+}

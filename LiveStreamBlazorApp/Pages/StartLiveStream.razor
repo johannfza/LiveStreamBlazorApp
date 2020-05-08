@@ -47,7 +47,9 @@
 
                             <video width="100%" id="vidSave" controls></video>
                         </div>
-                        <button id="Download" @onclick="@DownloadVideo">Download</button>
+                        <div>
+                            <button class="btn btn-block btn-outline-secondary" @onclick="@DownloadVideo">Download</button>
+                        </div>
                     }
 
                     @if (broadcastState == BroadcastState.Preview || broadcastState == BroadcastState.Live)
@@ -125,8 +127,7 @@
             </div>
 
             <div class="col-md-4">
-
-                <a>chat box </a>
+                <Chat></Chat>
             </div>
         </div>
     </div>
