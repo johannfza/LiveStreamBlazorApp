@@ -68,6 +68,7 @@ namespace MediaManager.Api
                 endpoints.MapHub<MediaDbHub>("/mediadbhub");
                 endpoints.MapHub<NotificationHub>("/notificationhub");
                 endpoints.MapHub<ChatHub>("/chathub");
+                endpoints.MapHub<LiveStreamHub>("/livestreamhub");
                 endpoints.MapControllers();
             });
 

@@ -5,42 +5,22 @@
         <h3>@Title</h3>
     </div>
     <div>
-        <div class="row">
-            <h4>Status</h4>
-            <table class="table">
-                @*<-- --> Satus </-->*@
-                <tr>
-                    <th>
-                        Notification Connection Status:
-                    </th>
-                    <td>
-                        <font color="@NotificationServerConnectionStatusColor">@NotificationServerConnectionStatus</font>
-                    </td>
-                </tr>
-                <tr>
-                    <th>
-                        Notification:
-                    </th>
-                    <td>
-                        @NotificationMsg
-                    </td>
-                </tr>
-            </table>
+        <div>
+            <NotificationPanel/>
         </div>
-
         <div class="row">
             <div class="col-md-8">
                 @*<-- --> Live Stream Form </-->*@
                 <div>
                     @*<-- --> Video PLayer </-->*@
-                    @if (broadcastState == BroadcastState.Live)
+                    @if (BroadcastState == BroadcastState.Live)
                     {
                         <div>
                             <font color=red>Live Now</font>
                         </div>
 
                     }
-                    @if (broadcastState == BroadcastState.Ended)
+                    @if (BroadcastState == BroadcastState.Ended)
                     {
                         <div>
                             <font>Recorded</font>
@@ -52,7 +32,7 @@
                         </div>
                     }
 
-                    @if (broadcastState == BroadcastState.Preview || broadcastState == BroadcastState.Live)
+                    @if (BroadcastState == BroadcastState.Preview || BroadcastState == BroadcastState.Live)
                     {
                         <video width="100%" id="vidInput" muted>
                             <source id="video_source" />
@@ -63,7 +43,7 @@
 
                 <div>
                     @*<-- --> Form</-->*@
-                    @if (broadcastState == BroadcastState.Live)
+                    @if (BroadcastState == BroadcastState.Live)
                     {
                         <div>
                             <button class="btn btn-block btn-outline-secondary" @onclick="@EndStreamAsync">End Live</button>
@@ -73,7 +53,7 @@
 
                     <EditForm Model="@liveStream" OnValidSubmit="@SubmitLiveStream">
 
-                        @if (broadcastState == BroadcastState.Preview)
+                        @if (BroadcastState == BroadcastState.Preview)
                         {
 
                             <div>
@@ -140,25 +120,23 @@
 
     //Connnections
     public static readonly HttpConnectionAttributes STREAMSERVER = StreamConnectionManager.STREAMSERVER;
-    public static readonly HttpConnectionAttributes NOTIFICATIONSERVER = StreamConnectionManager.NOTIFICATIONSERVER;
 
     public readonly string INGESTURL = $"rtmp://{STREAMSERVER.HostIP}/{STREAMSERVER.Route}";
 
     //Page State
-    public BroadcastState broadcastState { get; set; } = BroadcastState.Preview;
+    protected BroadcastState BroadcastState { get; set; } = BroadcastState.Preview;
 
     //Tools
     [Inject]
     protected HttpClient Http { get; set; }
     [Inject]
     protected IJSRuntime JSRuntime { get; set; }
-    protected HubConnection notificationServerConnection { get; set; } = null;
+
+    private LiveStreamNotificationClient client = null;
 
     //Page Attributes
     public string Title = "LiveStream";
     public LiveStream liveStream = new LiveStream();
-    public string NotificationMsg { get; set; } = string.Empty;
-    public string NotificationServerConnectionStatus { get; set; } = "Not Connected";
 
     public string BlobURL = "";
 
@@ -167,15 +145,9 @@
     //UI_Logic
     protected bool IsDisabled { get; set; } = false;
 
-    //UI Attributes
-    public string NotificationServerConnectionStatusColor = "red";
-
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine(TAG + "OnInitializedAsync: " + STREAMSERVER.GetURL());
-        Console.WriteLine(TAG + "OnInitializedAsync: " + NOTIFICATIONSERVER.GetURL());
-
-        await ConnectToNotificationServerAsync();
         await base.OnInitializedAsync();
         liveStream.StreamKey = Guid.NewGuid().ToString();
         liveStream.Url = $"https://{STREAMSERVER.HostIP}:{STREAMSERVER.Port}/hls/{liveStream.StreamKey}.m3u8";
@@ -191,7 +163,7 @@
             StateHasChanged();
         }
 
-        if (broadcastState == BroadcastState.Ended && firstRenderAfterEnded)
+        if (BroadcastState == BroadcastState.Ended && firstRenderAfterEnded)
         {
             await LoadRecordedeVideoAsync();
             firstRenderAfterEnded = false;
@@ -206,27 +178,58 @@
 
     protected async Task SubmitLiveStream()
     {
-
-        broadcastState = BroadcastState.Live;
+        BroadcastState = BroadcastState.Live;
         IsDisabled = true;
         liveStream.DatePublished = DateTime.UtcNow.ToLocalTime().ToString();
         await JSRuntime.InvokeVoidAsync("startlivestream");
         var response = await Http.PostJsonAsync<LiveStream>("https://localhost:5001/api/livestreams", liveStream);
+        System.Threading.Thread.Sleep(20000);
+        await InitLiveStreamNotificationAsync(response);
         Debug.WriteLine(response.ToString());
         StateHasChanged();
 
     }
+
+
+    public async Task InitLiveStreamNotificationAsync(LiveStream liveStream)
+    {
+        client = new LiveStreamNotificationClient();
+        client.LiveStreamEvent += LiveStreamEvent;
+        await client.StartAsync();
+        await client.LiveStreamStartedAsync(liveStream);
+    }
+
+    protected void LiveStreamEvent(object sender, LiveStreamEventArgs e)
+    {
+        if (e.isLive)
+        {
+            Console.WriteLine(TAG + $"{e.LiveStream.Title} is Live");
+        } else
+        {
+            Console.WriteLine(TAG + $"{e.LiveStream.Title} has Ended");
+        }
+    }
+
+    protected async Task EndLiveStreamEvent()
+    {
+        System.Threading.Thread.Sleep(5000);
+        await client.LiveStreamEndedAsync(liveStream);
+        await client.StopAsync();
+        client = null;
+    }
+
     protected async Task EndStreamAsync()
     {
-        broadcastState = BroadcastState.Ended;
+        BroadcastState = BroadcastState.Ended;
         await JSRuntime.InvokeVoidAsync("stoplivestream");
+        await EndLiveStreamEvent();
         await Http.PostAsync("https://localhost:5001/api/notification?msg=The stream has ended", null);
     }
 
     protected async Task LoadRecordedeVideoAsync()
     {
         BlobURL = await JSRuntime.InvokeAsync<string>("getrecordingurl");
-        Debug.WriteLine(TAG + "LoadRecordedeVideoAsync: " + BlobURL);
+        Console.WriteLine(TAG + "LoadRecordedeVideoAsync: " + BlobURL);
     }
 
     protected async void Load()
@@ -247,40 +250,6 @@
         StateHasChanged();
     }
 
-    protected void OnNotificationServerConnectedUI()
-    {
-        NotificationServerConnectionStatus = "Connected";
-        NotificationServerConnectionStatusColor = "green";
-        NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Connected";
-    }
-
-    protected void OnNotificationServerDisconnectedUI()
-    {
-        NotificationServerConnectionStatus = "Disconnected";
-        NotificationServerConnectionStatusColor = "red";
-        NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Disconnected";
-    }
-
-    protected async Task ConnectToNotificationServerAsync()
-    {
-        notificationServerConnection = new HubConnectionBuilder().WithUrl(NOTIFICATIONSERVER.GetURL()).Build();
-
-        await notificationServerConnection.StartAsync();
-        OnNotificationServerConnectedUI();
-
-        notificationServerConnection.Closed += async (s) =>
-        {
-            await notificationServerConnection.StartAsync();
-            OnNotificationServerDisconnectedUI();
-        };
-
-        notificationServerConnection.On<string>("notification", msg =>
-        {
-            NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  " + msg;
-            StateHasChanged();
-        });
-    }
-
     protected async Task DownloadVideo()
     {
         Debug.WriteLine(TAG + "DownloadVideo: Downloading");
@@ -293,7 +262,6 @@
 
         var data = Task.FromResult(new byte[1000]);
 
-        Debug.WriteLine(TAG + "OnLiveStreamDataAvailable: ");
         return data;
     }
 

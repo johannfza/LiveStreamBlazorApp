@@ -102,7 +102,7 @@
         if (ShowVideo)
         {
             Debug.WriteLine(previewPlayer.Id.ToString());
-            await JSRuntime.InvokeVoidAsync("previewPlayer");
+            await JSRuntime.InvokeVoidAsync("initVideojs");
         }
         await base.OnAfterRenderAsync(firstRender);
     }
@@ -144,11 +144,7 @@
 
         notificationServerConnection.On<string>("notification", msg =>
         {
-            if (msg.Contains("LIVE"))
-            {
-                System.Threading.Thread.Sleep(20000);
-            }
-            else if (msg.Contains("ended"))
+            if (msg.Contains("ended"))
             {
                 //ThereIsLiveVideo = false;
                 ShowVideo = false;

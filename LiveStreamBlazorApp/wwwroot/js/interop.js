@@ -13,8 +13,9 @@ function createAlert(text) {
     alert(text);
 }
 
+window.initVideojs = initVideojs;
 
-function previewPlayer() {
+function initVideojs() {
     var video = videojs(document.getElementById('video'), {}, function () {
         console.log("Video loaded");
     });

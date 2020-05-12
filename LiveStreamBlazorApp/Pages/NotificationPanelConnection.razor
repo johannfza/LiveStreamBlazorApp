@@ -1,0 +1,63 @@
+﻿<div>
+    <table class="table">
+        @*<-- --> Satus </-->*@
+        <tr>
+            <th>
+                Notification Connection Status:
+            </th>
+            <td>
+                <font color="@NotificationServerConnectionStatusColor">@NotificationServerConnectionStatus</font>
+            </td>
+        </tr>
+    </table>
+</div>
+
+@code {
+    public static readonly string TAG = "NotificationPanel: ";
+
+
+    public static readonly HttpConnectionAttributes NOTIFICATIONSERVER = StreamConnectionManager.NOTIFICATIONSERVER;
+
+    protected HubConnection notificationServerConnection { get; set; } = null;
+
+    public string NotificationMsg { get; set; } = string.Empty;
+    public string NotificationServerConnectionStatus { get; set; } = "Not Connected";
+
+    public string NotificationServerConnectionStatusColor = "red";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await ConnectToNotificationServerAsync();
+        await base.OnInitializedAsync();
+    }
+
+    protected async Task ConnectToNotificationServerAsync()
+    {
+        notificationServerConnection = new HubConnectionBuilder().WithUrl(NOTIFICATIONSERVER.GetURL()).Build();
+
+        await notificationServerConnection.StartAsync();
+        OnNotificationServerConnectedUI();
+
+        notificationServerConnection.Closed += async (s) =>
+        {
+            await notificationServerConnection.StartAsync();
+            OnNotificationServerDisconnectedUI();
+        };
+    }
+
+    protected void OnNotificationServerConnectedUI()
+    {
+        NotificationServerConnectionStatus = "Connected";
+        NotificationServerConnectionStatusColor = "green";
+        NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Connected";
+    }
+
+    protected void OnNotificationServerDisconnectedUI()
+    {
+        NotificationServerConnectionStatus = "Disconnected";
+        NotificationServerConnectionStatusColor = "red";
+        NotificationMsg = DateTime.UtcNow.ToLocalTime().ToString() + ":  Disconnected";
+    }
+
+}
