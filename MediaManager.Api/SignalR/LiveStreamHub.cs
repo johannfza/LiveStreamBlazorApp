@@ -14,8 +14,6 @@ namespace MediaManager.Api.SignalR
         public static readonly string TAG = "LiveStreamHub: ";
         private static readonly Dictionary<string, LiveStream> liveStreamLookup = new Dictionary<string, LiveStream>();
 
-
-
         public async Task<List<LiveStream>> Register()
         {
             return liveStreamLookup.Values.ToList();
@@ -25,7 +23,12 @@ namespace MediaManager.Api.SignalR
         {
             var currentId = Context.ConnectionId;
             liveStreamLookup.Add(currentId, liveStream);
+            Console.WriteLine(TAG + $"{currentId} Hub has been notified. Starting buffered countdown before notification is sent!");
+
+            System.Threading.Thread.Sleep(20000); // problem
+
             Console.WriteLine(TAG + $"{currentId} has started a livestream");
+
             await Clients.All.SendAsync(LiveStreamClientState.LIVE,liveStream);
 
         }

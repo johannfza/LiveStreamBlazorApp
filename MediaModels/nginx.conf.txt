@@ -1,0 +1,23 @@
+﻿http {
+
+    server {
+	listen	 80;
+	location / {
+            proxy_pass http://localhost:80;
+	}
+	
+	location /nms/api {
+	    proxy_pass http://localhost:8000/api;	
+	}
+	
+	location /nms/stream {
+	    proxy_pass http://localhost:1935/live;
+	}
+
+	location /nms/watch {
+	    proxy_pass http://localhost:8000/live;
+	}
+    }
+}
+
+events { }

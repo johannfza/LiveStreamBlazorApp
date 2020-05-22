@@ -6,37 +6,52 @@
     </div>
     <div>
         <div>
-            <NotificationPanel/>
+            <NotificationPanel />
         </div>
         <div class="row">
             <div class="col-md-8">
                 @*<-- --> Live Stream Form </-->*@
-                <div>
+                <div class="outer-container">
                     @*<-- --> Video PLayer </-->*@
-                    @if (BroadcastState == BroadcastState.Live)
-                    {
-                        <div>
-                            <font color=red>Live Now</font>
-                        </div>
 
-                    }
                     @if (BroadcastState == BroadcastState.Ended)
                     {
-                        <div>
-                            <font>Recorded</font>
-
-                            <video width="100%" id="vidSave" controls></video>
-                        </div>
-                        <div>
-                            <button class="btn btn-block btn-outline-secondary" @onclick="@DownloadVideo">Download</button>
+                        <div class="inner-container">
+                            <div class="video-overlay">
+                                <p>RECORDED</p>
+                            </div>
+                            <div>
+                                <video id="vidSave" controls></video>
+                            </div>
                         </div>
                     }
 
                     @if (BroadcastState == BroadcastState.Preview || BroadcastState == BroadcastState.Live)
                     {
-                        <video width="100%" id="vidInput" muted>
-                            <source id="video_source" />
-                        </video>
+
+                        <div class="inner-container">
+
+                            @if (BroadcastState == BroadcastState.Live)
+                            {
+                                <div class="video-overlay">
+                                    <img src="images/live.png" width="40" class="logo blinking">
+                                </div>
+                            }
+                            @if (BroadcastState == BroadcastState.Preview)
+                            {
+                                <div class="video-overlay">
+                                    <p>PREVIEW</p>
+                                </div>
+                            }
+
+                            <div>
+                                <video id="vidInput" muted>
+                                    <source id="video_source" />
+                                </video>
+                            </div>
+
+                        </div>
+
                     }
 
                 </div>
@@ -49,6 +64,12 @@
                             <button class="btn btn-block btn-outline-secondary" @onclick="@EndStreamAsync">End Live</button>
                         </div>
                     }
+                    @if (BroadcastState == BroadcastState.Ended)
+                    {
+                        <div>
+                            <button class="btn btn-block btn-outline-secondary" @onclick="@DownloadVideo">Download</button>
+                        </div>
+                    }
 
 
                     <EditForm Model="@liveStream" OnValidSubmit="@SubmitLiveStream">
@@ -57,7 +78,7 @@
                         {
 
                             <div>
-                                <button class="btn btn-block btn-info" type="submit">Go Live</button>
+                                <button class="btn btn-block btn-danger" type="submit">Start Live</button>
                             </div>
 
                         }
@@ -73,41 +94,51 @@
                             <InputTextArea class="form-control" @bind-Value="liveStream.Description" placeholder="Description" disabled="@IsDisabled" />
                             <ValidationMessage For="@(() => liveStream.Description)" />
                         </div>
-                        <div class="form-group">
-                            <label>RTMP Url</label>
-                            <div class="input-group mb-3">
-                                <InputText class="form-control" id="StreamUrl" @bind-Value="liveStream.Url" disabled="@IsDisabled" />
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, "StreamUrl"))">Copy</button>
+
+                        @if (AdminShow)
+                        {
+
+                            <div id="admininfo">
+                                <div class="form-group">
+                                    <label>RTMP Url</label>
+                                    <div class="input-group mb-3">
+                                        <InputText class="form-control" id="StreamUrl" @bind-Value="liveStream.Url" disabled="@IsDisabled" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, "StreamUrl"))">Copy</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stream Key</label>
+                                    <small class="form-text text-muted">Stream key is dynamic.</small>
+                                    <div class="input-group">
+                                        <InputText class="form-control" id="StreamKey" @bind-Value="liveStream.StreamKey" @oninput="@UpdateStreamUrl" disabled="@IsDisabled" />
+                                        <div class="form-group input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, "StreamKey"))">Copy</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Live Stream Url</label>
+                                    <small class="form-text text-muted">After it's published</small>
+                                    <div class="input-group">
+                                        <InputText class="form-control" id="@liveStream.Url" @bind-Value="liveStream.Url" readonly />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, liveStream.Url))">Copy</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Stream Key</label>
-                            <small class="form-text text-muted">Stream key is dynamic.</small>
-                            <div class="input-group">
-                                <InputText class="form-control" id="StreamKey" @bind-Value="liveStream.StreamKey" @oninput="@UpdateStreamUrl" disabled="@IsDisabled" />
-                                <div class="form-group input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, "StreamKey"))">Copy</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Live Stream Url</label>
-                            <small class="form-text text-muted">After it's published</small>
-                            <div class="input-group">
-                                <InputText class="form-control" id="@liveStream.Url" @bind-Value="liveStream.Url" readonly />
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" @onclick="@(e => CopyToClipboard(e, liveStream.Url))">Copy</button>
-                                </div>
-                            </div>
+                        }
+                        <div>
+                            <button class="btn btn-info" type="button" @onclick="@AdminToggle">@showDetailsButtonText</button>
                         </div>
                     </EditForm>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <Chat></Chat>
+                <Chat roomName="@liveStream.StreamKey"></Chat>
             </div>
         </div>
     </div>
@@ -121,7 +152,9 @@
     //Connnections
     public static readonly HttpConnectionAttributes STREAMSERVER = StreamConnectionManager.STREAMSERVER;
 
-    public readonly string INGESTURL = $"rtmp://{STREAMSERVER.HostIP}/{STREAMSERVER.Route}";
+    public readonly string INGESTURL = $"rtmp://{STREAMSERVER.HostIP}/live";
+
+    public readonly string WSSERVER = $"wss://{STREAMSERVER.HostIP}/rtmp/";
 
     //Page State
     protected BroadcastState BroadcastState { get; set; } = BroadcastState.Preview;
@@ -140,17 +173,21 @@
 
     public string BlobURL = "";
 
+    public string showDetailsButtonText = "Show RTMP Details";
+
     public bool firstRenderAfterEnded = true;
 
     //UI_Logic
     protected bool IsDisabled { get; set; } = false;
+    protected bool AdminShow { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine(TAG + "OnInitializedAsync: " + STREAMSERVER.GetURL());
         await base.OnInitializedAsync();
-        liveStream.StreamKey = Guid.NewGuid().ToString();
-        liveStream.Url = $"https://{STREAMSERVER.HostIP}:{STREAMSERVER.Port}/hls/{liveStream.StreamKey}.m3u8";
+        //liveStream.StreamKey = Guid.NewGuid().ToString();
+        liveStream.StreamKey = "test";
+        liveStream.Url = $"https://{STREAMSERVER.HostIP}/{STREAMSERVER.Route}/watch/{liveStream.StreamKey}/index.m3u8";
     }
 
 
@@ -159,6 +196,7 @@
         if (firstRender)
         {
             //await JSRuntime.InvokeVoidAsync("videoplayer.previewPlayer", "previewPlayer");
+            await InitLiveStreamNotificationAsync();
             await JSRuntime.InvokeVoidAsync("oninitstartlivestreampage");
             StateHasChanged();
         }
@@ -171,9 +209,11 @@
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    protected async Task GetMessageAsync()
+    protected void AdminToggle()
     {
-        await JSRuntime.InvokeVoidAsync("startlivestream");
+        AdminShow = !AdminShow;
+        showDetailsButtonText = showDetailsButtonText == "Show RTMP Details" ? "Hide" : "Show RTMP Details";
+        StateHasChanged();
     }
 
     protected async Task SubmitLiveStream()
@@ -181,30 +221,34 @@
         BroadcastState = BroadcastState.Live;
         IsDisabled = true;
         liveStream.DatePublished = DateTime.UtcNow.ToLocalTime().ToString();
-        await JSRuntime.InvokeVoidAsync("startlivestream");
+        string websocketserver = WSSERVER;
+        string streamendpoint = $"{INGESTURL}/{liveStream.StreamKey}";
+
+        Console.WriteLine(TAG + $"SubmitLiveStream: StreamingEndpoint = {streamendpoint}");
+        await JSRuntime.InvokeVoidAsync("startlivestream",streamendpoint, websocketserver);
         var response = await Http.PostJsonAsync<LiveStream>("https://localhost:5001/api/livestreams", liveStream);
-        System.Threading.Thread.Sleep(20000);
-        await InitLiveStreamNotificationAsync(response);
+        await client.LiveStreamStartedAsync(response);
         Debug.WriteLine(response.ToString());
         StateHasChanged();
 
     }
 
 
-    public async Task InitLiveStreamNotificationAsync(LiveStream liveStream)
+    public async Task InitLiveStreamNotificationAsync()
     {
         client = new LiveStreamNotificationClient();
         client.LiveStreamEvent += LiveStreamEvent;
         await client.StartAsync();
-        await client.LiveStreamStartedAsync(liveStream);
     }
+
 
     protected void LiveStreamEvent(object sender, LiveStreamEventArgs e)
     {
         if (e.isLive)
         {
             Console.WriteLine(TAG + $"{e.LiveStream.Title} is Live");
-        } else
+        }
+        else
         {
             Console.WriteLine(TAG + $"{e.LiveStream.Title} has Ended");
         }
@@ -246,7 +290,7 @@
     protected void UpdateStreamUrl(ChangeEventArgs args)
     {
         liveStream.StreamKey = args.Value.ToString();
-        liveStream.Url = $"https://{STREAMSERVER.HostIP}:{STREAMSERVER.Port}/hls/{liveStream.StreamKey}.m3u8";
+        liveStream.Url = $"https://{STREAMSERVER.HostIP}/{STREAMSERVER.Route}/watch/{liveStream.StreamKey}/index.m3u8";
         StateHasChanged();
     }
 
