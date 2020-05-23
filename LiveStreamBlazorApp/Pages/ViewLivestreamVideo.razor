@@ -108,7 +108,7 @@
     {
         if (e.isLive && PageState != ViewLivestreamVideoState.Watching)
         {
-            Console.WriteLine(TAG + "LiveStreamEvent: StreamUrl" + e.LiveStream.Url);
+            Console.WriteLine(TAG + "LiveStreamEvent: StreamUrl " + e.LiveStream.Url);
             //newLiveStream.Url = $"https://{STREAMSERVER.HostIP}:{STREAMSERVER.Port}/live/{streamkey}/index.m3u8";
             newLiveStream = e.LiveStream;
             PageState = ViewLivestreamVideoState.Standby;

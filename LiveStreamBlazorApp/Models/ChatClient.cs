@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using System.Collections.Generic;
 using MediaModels;
 
 namespace LiveStreamBlazorApp.Models
@@ -13,20 +14,24 @@ namespace LiveStreamBlazorApp.Models
         public string HUBURL = StreamConnectionManager.CHATSERVER.GetURL();
         private HubConnection hubConnection;
         public readonly string Username;
+        public readonly string Roomname;
+
+        public List<string> UsersInChat;
         private bool started = false;
 
         public EventHandler<MessageRecievedEventArgs> MessageRecieved;
 
-        public ChatClient(string username)
+        public ChatClient(string username, string roomname)
         {
             //navigationManager = na
             Username = username;
+            Roomname = roomname;
 
         }
 
         //Process States: StartAsync, SendAsync, StopAsync,
 
-        public async Task StartAsync(string roomName)
+        public async Task StartAsync()
         {
             if (!started)
             {
@@ -36,9 +41,9 @@ namespace LiveStreamBlazorApp.Models
 
                 Console.WriteLine($"{TAG} Starting ChatClient: Username= {Username}");
 
-                hubConnection.On<string, string>(MessageClientState.RECIEVE, (user, message) =>
+                hubConnection.On<string, string>(MessageClientState.RECIEVE, async (user, message) =>
                 {
-                    OnMessageRecieved(user, message);
+                    await OnMessageRecieved(user, message);
 
                 });
 
@@ -46,8 +51,15 @@ namespace LiveStreamBlazorApp.Models
                 Console.WriteLine($"{TAG} A ChatClient Started: Username= {Username}");
                 started = true;
 
-                await hubConnection.SendAsync(MessageClientState.REGISTER, Username, roomName);
+                await hubConnection.SendAsync(MessageClientState.REGISTER, Username, Roomname);
+                await GetUsers();
             }
+        }
+
+        public async Task GetUsers()
+        {
+            UsersInChat = await hubConnection.InvokeAsync<List<string>>(MessageClientState.GETUSERS, Roomname);
+
         }
 
         public async Task SendAsync(string message)
@@ -79,14 +91,11 @@ namespace LiveStreamBlazorApp.Models
         //Events: OnMessageRecieved
 
 
-        private void OnMessageRecieved(string username, string message) // on message recieved 
+        private async Task OnMessageRecieved(string username, string message) // on message recieved 
         {
 
             MessageRecieved?.Invoke(this, new MessageRecievedEventArgs(username, message));
-            //vs
-
-            // if(MessageRecieved != null)
-            // MessageRecieved(this, new MessageRecievedEventArgs(username, message));
+            await GetUsers();
         }
     }
 

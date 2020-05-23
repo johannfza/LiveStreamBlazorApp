@@ -158,11 +158,10 @@
         try
         {
             messages.Clear();
-            client = new ChatClient(username);
+            client = new ChatClient(username, roomName);
             client.MessageRecieved += MessageRecieved;
             Console.WriteLine($"{TAG} Starting Chat");
-            await client.StartAsync(roomName);
-            Console.WriteLine($"{TAG} Starting Chat?");
+            await client.StartAsync();
             chatting = true;
 
         }
@@ -186,6 +185,11 @@
         messages.Add(newMsg);
         StateHasChanged();
         JSRuntime.InvokeVoidAsync("tolatestmsg");
+
+        foreach (string s in client.UsersInChat)
+        {
+            System.Console.WriteLine("Users in chat: " + s);
+        }
 
     }
 

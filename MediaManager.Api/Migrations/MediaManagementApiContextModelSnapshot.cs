@@ -18,6 +18,22 @@ namespace MediaManager.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("MediaModels.Connection", b =>
+                {
+                    b.Property<string>("ConnectionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("Connected")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RoomName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ConnectionId");
+
+                    b.ToTable("Connections");
+                });
+
             modelBuilder.Entity("MediaModels.LiveStream", b =>
                 {
                     b.Property<int>("Id")
@@ -55,7 +71,7 @@ namespace MediaManager.Api.Migrations
                         new
                         {
                             Id = 1,
-                            DatePublished = "05/05/2020 13:18:45",
+                            DatePublished = "23/05/2020 18:12:45",
                             Description = "This is Live Stream 1",
                             StreamKey = "key1",
                             Title = "LiveStream 1",
@@ -65,7 +81,7 @@ namespace MediaManager.Api.Migrations
                         new
                         {
                             Id = 2,
-                            DatePublished = "05/05/2020 13:18:45",
+                            DatePublished = "23/05/2020 18:12:45",
                             Description = "This is Live Stream 2",
                             StreamKey = "key2",
                             Title = "LiveStream 2",
@@ -75,7 +91,7 @@ namespace MediaManager.Api.Migrations
                         new
                         {
                             Id = 3,
-                            DatePublished = "05/05/2020 13:18:45",
+                            DatePublished = "23/05/2020 18:12:45",
                             Description = "This is Live Stream 3",
                             StreamKey = "key3",
                             Title = "LiveStream 3",
@@ -85,13 +101,56 @@ namespace MediaManager.Api.Migrations
                         new
                         {
                             Id = 4,
-                            DatePublished = "05/05/2020 13:18:45",
+                            DatePublished = "23/05/2020 18:12:45",
                             Description = "This is Live Stream 4",
                             StreamKey = "key4",
                             Title = "LiveStream 4",
                             Url = "http://www.golive.com/4",
                             Views = 0
                         });
+                });
+
+            modelBuilder.Entity("MediaModels.User", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("MediaModels.UserConnection", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConnectionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "ConnectionId");
+
+                    b.HasIndex("ConnectionId");
+
+                    b.ToTable("UserConnections");
+                });
+
+            modelBuilder.Entity("MediaModels.UserConnection", b =>
+                {
+                    b.HasOne("MediaModels.Connection", "Connection")
+                        .WithMany("UserConnections")
+                        .HasForeignKey("ConnectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediaModels.User", "User")
+                        .WithMany("Connections")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

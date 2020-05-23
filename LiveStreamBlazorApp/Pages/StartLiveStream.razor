@@ -152,7 +152,7 @@
     //Connnections
     public static readonly HttpConnectionAttributes STREAMSERVER = StreamConnectionManager.STREAMSERVER;
 
-    public readonly string INGESTURL = $"rtmp://{STREAMSERVER.HostIP}/live";
+    public readonly string INGESTURL = $"rtmp://localhost:1935/live";
 
     public readonly string WSSERVER = $"wss://{STREAMSERVER.HostIP}/rtmp/";
 
