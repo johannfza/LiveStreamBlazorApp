@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:53779",
+      "applicationUrl": "http://localhost:4404",
       "sslPort": 44305
     }
   },
@@ -18,7 +18,7 @@
     "LiveStreamBlazorApp": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:4403;http://localhost:4480",
+      "applicationUrl": "https://localhost:4403;https://localhost:4410",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

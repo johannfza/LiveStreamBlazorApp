@@ -1,10 +1,141 @@
-﻿using System;
-namespace LiveStreamBlazorApp.Pages
-{
-	public class ViewLivestreamVideo
-	{
-		public ViewLivestreamVideo()
-		{
-		}
-	}
+﻿<div>
+
+    @if (PageState == ViewLivestreamVideoState.NoStream)
+    {
+        <div class="centermystuff">
+
+            <p>No current Livestream</p>
+
+        </div>
+    }
+
+    @if (PageState == ViewLivestreamVideoState.Standby)
+    {
+        <div class="centermystuff">
+            <div>
+                <p>Watch @newLiveStream.Title</p>
+            </div>
+            <button type="button" class="btn btn-outline-danger" @onclick="@LoadLiveStream">Watch Now</button>
+        </div>
+    }
+
+    @if (PageState == ViewLivestreamVideoState.Watching)
+    {
+
+
+        <h4>@newLiveStream.Title</h4>
+
+        <video id="video" preload="none" class="video-js vjs-16-9 vjs-big-play-centered" controls>
+
+            <source src="@newLiveStream.Url" type="application/x-mpegURL" />
+            @*<source src="MY_VIDEO.webm" type="video/webm" />*@
+            <p class="vjs-no-js">
+                To view this video please enable JavaScript, and consider upgrading to a
+                web browser that
+                <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+            </p>
+        </video>
+
+        <p>@newLiveStream.Description</p>
+    }
+
+    @if (PageState == ViewLivestreamVideoState.HasEnded)
+    {
+        <div class="centermystuff">
+
+            <p>@newLiveStream.Title has ended</p>
+
+        </div>
+    }
+</div>
+
+@code {
+    public static readonly string TAG = "ViewLivestreamVideo: ";
+
+    protected readonly HttpConnectionAttributes STREAMSERVER = StreamConnectionManager.STREAMSERVER;
+    protected string StreamSource { get; set; } = "";
+
+
+    //https://10.0.0.29:8443/live/test/index.m3u8
+
+    private LiveStream newLiveStream = new LiveStream();
+
+    public enum ViewLivestreamVideoState
+    {
+        Watching, NoStream, Standby, HasEnded
+    }
+
+    ViewLivestreamVideoState PageState = ViewLivestreamVideoState.NoStream;
+
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; }
+
+    private LiveStreamNotificationClient client = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ConnectToLiveStreamNotificationServerAsync();
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (PageState == ViewLivestreamVideoState.Watching)
+        {
+            await JSRuntime.InvokeVoidAsync("initVideojs");
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected async Task ConnectToLiveStreamNotificationServerAsync()
+    {
+        client = new LiveStreamNotificationClient();
+        client.LiveStreamEvent += LiveStreamEvent;
+        await client.StartAsync();
+        if (client.currentstreams.Count() != 0)
+        {
+            PageState = ViewLivestreamVideoState.Standby;
+            newLiveStream = client.currentstreams.First();
+            Console.WriteLine(TAG + $"{newLiveStream.Title} is Live");
+            StateHasChanged();
+        }
+
+    }
+
+
+
+    protected void LiveStreamEvent(object sender, LiveStreamEventArgs e)
+    {
+        if (e.isLive && PageState != ViewLivestreamVideoState.Watching)
+        {
+            Console.WriteLine(TAG + "LiveStreamEvent: StreamUrl" + e.LiveStream.Url);
+            //newLiveStream.Url = $"https://{STREAMSERVER.HostIP}:{STREAMSERVER.Port}/live/{streamkey}/index.m3u8";
+            newLiveStream = e.LiveStream;
+            PageState = ViewLivestreamVideoState.Standby;
+            newLiveStream = e.LiveStream;
+            Console.WriteLine(TAG + $"{e.LiveStream.Title} is Live");
+            StateHasChanged();
+        }
+        else if (!e.isLive && PageState != ViewLivestreamVideoState.Watching)
+        {
+            PageState = ViewLivestreamVideoState.HasEnded;
+            newLiveStream = e.LiveStream;
+            Console.WriteLine(TAG + $"{e.LiveStream.Title} has Ended");
+            StateHasChanged();
+        }
+        else
+        {
+            PageState = ViewLivestreamVideoState.NoStream;
+            newLiveStream = new LiveStream();
+            StateHasChanged();
+        }
+    }
+
+    protected void LoadLiveStream()
+    {
+        PageState = ViewLivestreamVideoState.Watching;
+        StateHasChanged();
+    }
+
+
 }

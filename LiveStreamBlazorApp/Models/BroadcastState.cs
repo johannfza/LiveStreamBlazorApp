@@ -1,10 +1,8 @@
 ﻿using System;
 namespace LiveStreamBlazorApp.Models
 {
-    public class BroadcastState
+    public enum BroadcastState
     {
-        public BroadcastState()
-        {
-        }
+        Preview, Live, Ended, Error
     }
 }

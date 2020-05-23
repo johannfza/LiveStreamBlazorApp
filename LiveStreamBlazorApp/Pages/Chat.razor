@@ -1,10 +1,239 @@
-﻿using System;
-namespace LiveStreamBlazorApp.Pages
-{
-	public class Chat
-	{
-		public Chat()
-		{
-		}
-	}
+﻿@page "/chat"
+
+<div class="card card-bordered">
+
+    <div class="card-header">
+
+        <p>Chat</p>
+        @if (chatting)
+        {
+            <button class="btn btn-xs btn-secondary" @onclick="@DisconnectAsync">Leave Chat</button>
+        }
+    </div>
+
+    <div class="ps-container ps-theme-default ps-active-y" id="chat-content" style="overflow-y: scroll !important; height:400px !important;">
+
+        @if (!chatting)
+        {
+
+
+            <div class="container centermystuff">
+                <div class="row justify-content-center">
+                    <div class="col-md">
+                        <p>Enter a username to start chatting</p>
+                    </div>
+                </div>
+                <div class="row justify-content-center centermystuff">
+                    <div class="col-md maxinputwidth">
+                        <input id="usernameinput" class="form-control maxinputwidth" type="text" maxlength="32" @onkeyup="@(e => EnterUsernameCheck(e))" @bind="@username" placeholder="Username" />
+                    </div>
+                </div>
+
+                @if (message != null)
+                {<div class="row justify-content-center">
+                        <div class="col-md">
+                            <div class="invalid-feedback">@message</div>
+                            <small id="emailHelp" class="form-text text-muted">@message</small>
+                        </div>
+                    </div>
+                }
+                <div class="row justify-content-center">
+                    <div class="col-md">
+                        <button id="InitChatAsync" class="btn btn-primary toppadding" @onclick="@InitChatAsync">Join Chat</button>
+                    </div>
+                </div>
+            </div>
+
+
+        }
+
+        @if (chatting)
+        {
+            @foreach (var item in messages)
+            {
+                <div class="@item.CSS">
+                    <div class="media-body">
+                        <p><b>@item.Username</b><br> @item.Body</p>
+                        <p class="meta"><small class="timesmall">@item.Time</small></p>
+                    </div>
+                </div>
+
+            }
+            <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
+                <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+            </div>
+            <div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;">
+                <div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div>
+            </div>
+
+        }
+
+    </div>
+
+    <div class="publisher bt-1 border-light">
+        <input id="messageinput" class="publisher-input" type="text" placeholder="Write a message..." @onkeyup="@(e => EnterMsgCheck(e))" @bind="@newMessage" />
+        <a id="SendAsync" class="publisher-btn text-info" @onclick="@SendAsync" data-abc="true"><i class="fas fa-paper-plane"></i></a>
+    </div>
+</div>
+
+
+@code {
+    public static readonly string TAG = "Chat Component: ";
+
+    string timenow = DateTime.Now.ToLocalTime().ToString();
+
+    [Parameter]
+    public string roomName { get; set; } = "noRoom";
+
+    bool chatting = false;
+    string username = null;
+    ChatClient client = null;
+
+    string message = null;
+    string newMessage = null;
+
+    List<Message> messages = new List<Message>();
+
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(roomName))
+        {
+            Console.WriteLine(TAG + "No Client Group Specified");
+        }
+        else
+        {
+            Console.WriteLine(TAG + "In Room: " + roomName);
+        }
+        await base.OnInitializedAsync();
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        //if (!chatting)
+        //{
+        //    await JSRuntime.InvokeVoidAsync("chatenteruser");
+        //}
+
+        //if (chatting)
+        //{
+        //    await JSRuntime.InvokeVoidAsync("initchatpage");
+        //}
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected async void EnterMsgCheck(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Console.WriteLine($"{TAG} EnterMsgCheck");
+            await SendAsync();
+            StateHasChanged();
+
+        }
+    }
+
+
+    protected async void EnterUsernameCheck(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Console.WriteLine($"{TAG} EnterMsgCheck");
+            await InitChatAsync();
+            StateHasChanged();
+        }
+    }
+
+    public async Task InitChatAsync()
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            message = "Please enter a name";
+            return;
+        }
+        try
+        {
+            messages.Clear();
+            client = new ChatClient(username);
+            client.MessageRecieved += MessageRecieved;
+            Console.WriteLine($"{TAG} Starting Chat");
+            await client.StartAsync(roomName);
+            Console.WriteLine($"{TAG} Starting Chat?");
+            chatting = true;
+
+        }
+        catch (Exception e)
+        {
+            message = $"{TAG} ERROR: Failed to start chat {e.Message}";
+            Console.WriteLine(message);
+            Console.WriteLine(e.StackTrace);
+        }
+    }
+
+    void MessageRecieved(object sender, MessageRecievedEventArgs e)
+    {
+        Console.WriteLine($"{TAG}: Recieved {e.Username} : {e.Message}");
+        bool isMine = false;
+        if (!string.IsNullOrWhiteSpace(e.Username))
+        {
+            isMine = string.Equals(e.Username, username, StringComparison.CurrentCultureIgnoreCase);
+        }
+        var newMsg = new Message(e.Username, e.Message, DateTime.UtcNow.ToLocalTime().ToString(), isMine);
+        messages.Add(newMsg);
+        StateHasChanged();
+        JSRuntime.InvokeVoidAsync("tolatestmsg");
+
+    }
+
+    async Task DisconnectAsync()
+    {
+        if (chatting)
+        {
+            await client.StopAsync();
+            client = null;
+            message = "chat ended";
+            chatting = false;
+            messages = new List<Message>();
+        }
+    }
+
+    public async Task SendAsync()
+    {
+        if (chatting && !string.IsNullOrWhiteSpace(newMessage))
+        {
+            await client.SendAsync(newMessage);
+            newMessage = "";
+        }
+    }
+
+    public class Message
+    {
+        public string Username { get; set; }
+        public string Body { get; set; }
+        public string Time { get; set; }
+
+        public bool Mine { get; set; }
+
+        public Message(string username, string body, string time, bool mine)
+        {
+            Username = username;
+            Body = body;
+            Time = time;
+            Mine = mine;
+        }
+
+        public string CSS
+        {
+            get
+            {
+                return Mine ? "media media-chat media-chat-reverse" : "media media-chat";
+            }
+        }
+
+    }
+
 }

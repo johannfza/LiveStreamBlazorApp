@@ -1,10 +1,25 @@
-﻿using System;
-namespace LiveStreamBlazorApp.Pages
-{
-	public class Client
-	{
-		public Client()
-		{
-		}
-	}
+﻿@page "/client"
+
+
+<div class="container">
+    <div class="row">
+        <h3>Client</h3>
+    </div>
+    <div>
+        <NotificationPanelConnection />
+    </div>
+    <div class="row">
+        <div class="col-sm-8">
+            <ViewLivestreamVideo />
+        </div>
+
+        <div class="col-sm-4">
+            <Chat />
+        </div>
+    </div>
+</div>
+
+
+@code {
+
 }
