@@ -17,7 +17,17 @@ namespace MediaManager.Api.SignalR
 
         public async Task SendMessage(string username, string message)
         {
-            await Clients.All.SendAsync(MessageClientState.RECIEVE, username, message);
+            var currentId = Context.ConnectionId;
+
+            if (!userLookup.TryGetValue(currentId, out ChatUser chatuser))
+            {
+                chatuser.UserName = "[unknown]";
+                chatuser.RoomName = "noRoom";
+
+            }
+
+            List<string> usersinchat = await GetUsers(chatuser.RoomName);
+            await Clients.Group(chatuser.RoomName).SendAsync(MessageClientState.RECIEVE, username, message, usersinchat );
         }
 
         public async Task Register(string username, string roomname)
@@ -25,9 +35,10 @@ namespace MediaManager.Api.SignalR
             var currentId = Context.ConnectionId;
             if (!userLookup.ContainsKey(currentId))
             {
-                userLookup.Add(currentId, new ChatUser( username, roomname));
+                userLookup.Add(currentId, new ChatUser(username, roomname));
                 await Groups.AddToGroupAsync(currentId, roomname);
-                await Clients.Group(roomname).SendAsync(MessageClientState.RECIEVE, username, $"{username} joined the chat");
+                List<string> usersinchat = await GetUsers(roomname);
+                await Clients.Group(roomname).SendAsync(MessageClientState.RECIEVE, username, $"{username} joined the chat", usersinchat);
 
             }
             // return list of users in the room
@@ -37,15 +48,17 @@ namespace MediaManager.Api.SignalR
         {
             var allusers = userLookup.Values.ToList();
             List<string> usersinroom = new List<string>();
-
-            foreach (ChatUser cu in allusers)
+            await Task.Run(() =>
             {
-                if(cu.RoomName == roomname)
+                foreach (ChatUser cu in allusers)
                 {
-                    usersinroom.Add(cu.UserName);
+                    if (cu.RoomName == roomname)
+                    {
+                        usersinroom.Add(cu.UserName);
 
+                    }
                 }
-            }
+            });
             return usersinroom;
 
         }
@@ -64,12 +77,15 @@ namespace MediaManager.Api.SignalR
             if (!userLookup.TryGetValue(id, out ChatUser chatuser))
             {
                 chatuser.UserName = "[unknown]";
+                chatuser.RoomName = "noRoom";
+
             }
 
             userLookup.Remove(id);
-            await Clients.AllExcept(Context.ConnectionId).SendAsync(
+            List<string> usersinchat = await GetUsers(chatuser.RoomName);
+            await Clients.Group(chatuser.RoomName).SendAsync(
                 MessageClientState.RECIEVE,
-                chatuser.UserName, $"{chatuser.UserName} has left the chat"
+                chatuser.UserName, $"{chatuser.UserName} has left the chat", usersinchat 
                 );
             await base.OnDisconnectedAsync(exception);
         }

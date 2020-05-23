@@ -41,10 +41,9 @@ namespace LiveStreamBlazorApp.Models
 
                 Console.WriteLine($"{TAG} Starting ChatClient: Username= {Username}");
 
-                hubConnection.On<string, string>(MessageClientState.RECIEVE, async (user, message) =>
+                hubConnection.On<string, string, List<string>>(MessageClientState.RECIEVE, async (user, message, usersinchat) =>
                 {
-                    await OnMessageRecieved(user, message);
-
+                    await OnMessageRecieved(user, message, usersinchat);
                 });
 
                 await hubConnection.StartAsync();
@@ -91,10 +90,10 @@ namespace LiveStreamBlazorApp.Models
         //Events: OnMessageRecieved
 
 
-        private async Task OnMessageRecieved(string username, string message) // on message recieved 
+        private async Task OnMessageRecieved(string username, string message , List<string> usersinchat) // on message recieved 
         {
 
-            MessageRecieved?.Invoke(this, new MessageRecievedEventArgs(username, message));
+            MessageRecieved?.Invoke(this, new MessageRecievedEventArgs(username, message, usersinchat));
             await GetUsers();
         }
     }
@@ -104,11 +103,13 @@ namespace LiveStreamBlazorApp.Models
     {
         public string Username { get; set; }
         public string Message { get; set; }
+        public List<string> UsersInChat {get; set;}
 
-        public MessageRecievedEventArgs(string username, string message)
+        public MessageRecievedEventArgs(string username, string message, List<string> usersinchat)
         {
             Username = username;
             Message = message;
+            UsersInChat = usersinchat;
         }
     }
 }

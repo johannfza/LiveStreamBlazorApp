@@ -16,7 +16,7 @@ namespace MediaManager.Api.SignalR
 
         public async Task<List<LiveStream>> Register()
         {
-            return liveStreamLookup.Values.ToList();
+            return await Task.Run(() => liveStreamLookup.Values.ToList());
         }
 
         public async Task LiveStreamStarted(LiveStream liveStream)

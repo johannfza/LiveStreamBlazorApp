@@ -6,7 +6,21 @@
 
         <p>Chat</p>
         @if (chatting)
-        {
+        { 
+            <div class="dropdown">
+                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Users
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    @foreach (string name in UsersInChat)
+                    {
+                        <a class="dropdown-item" href="#">@name</a>
+
+                    }
+
+                </div>
+            </div>
+
             <button class="btn btn-xs btn-secondary" @onclick="@DisconnectAsync">Leave Chat</button>
         }
     </div>
@@ -74,6 +88,9 @@
         <input id="messageinput" class="publisher-input" type="text" placeholder="Write a message..." @onkeyup="@(e => EnterMsgCheck(e))" @bind="@newMessage" />
         <a id="SendAsync" class="publisher-btn text-info" @onclick="@SendAsync" data-abc="true"><i class="fas fa-paper-plane"></i></a>
     </div>
+
+
+
 </div>
 
 
@@ -84,6 +101,8 @@
 
     [Parameter]
     public string roomName { get; set; } = "noRoom";
+
+    public List<string> UsersInChat = new List<string>();
 
     bool chatting = false;
     string username = null;
@@ -185,8 +204,14 @@
         messages.Add(newMsg);
         StateHasChanged();
         JSRuntime.InvokeVoidAsync("tolatestmsg");
+        UsersInChat = e.UsersInChat;
+        StateHasChanged();
+        Printusers();
+    }
 
-        foreach (string s in client.UsersInChat)
+    public void Printusers()
+    {
+        foreach (string s in UsersInChat)
         {
             System.Console.WriteLine("Users in chat: " + s);
         }
